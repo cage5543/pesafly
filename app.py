@@ -1,24 +1,37 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect
 import random, os
 from datetime import datetime
 from collections import deque
 
 app = Flask(__name__)
-app.secret_key = "pesafly-v13-9-referral"
+app.secret_key = "pesafly-v13-9-referral-SECURE-2026"
 
-users_db = {} # phone -> data
+users_db = {}
 all_withdraw_requests = []
 history = deque(maxlen=20)
 history.extend([round(random.uniform(1.2, 15.0),2) for _ in range(10)])
+
+ADMIN_PASSWORD = "PesaAdmin123"
 
 def get_user():
     phone = session.get('phone')
     return (phone, users_db.get(phone)) if phone else (None, None)
 
 @app.route('/')
-def index(): return render_template('index.html')
+def index():
+    return render_template('index.html')
+
 @app.route('/admin')
-def admin(): return render_template('admin.html')
+def admin():
+    return render_template('admin.html')
+
+@app.route('/api/admin-login', methods=['POST'])
+def admin_login():
+    pwd = request.json.get('password','')
+    if pwd == ADMIN_PASSWORD:
+        session['is_admin'] = True
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Wrong password"})
 
 @app.route('/api/auth', methods=['POST'])
 def auth():
@@ -31,7 +44,6 @@ def auth():
     if not password: return jsonify({"success": False, "error": "Enter password"})
     if action == 'register':
         if phone in users_db: return jsonify({"success": False, "error": "Number exists - login"})
-        # referral validation
         referrer = ref if ref in users_db and ref!= phone else None
         users_db[phone] = {
             "password": password, "real": 0.0, "bonus": 0.0, "ref_bonus": 0.0,
@@ -73,11 +85,7 @@ def me():
     phone, u = get_user()
     if not u: return jsonify({"logged": False})
     total = u['real'] + u['bonus'] + u['ref_bonus']
-    # withdraw limit logic
-    if u['bonus_claimed'] or u['ref_bonus']>0:
-        limit = 10000
-    else:
-        limit = 200
+    limit = 10000 if (u['bonus_claimed'] or u['ref_bonus']>0) else 200
     can_withdraw = total >= limit and (not u['bonus_locked'] if u['bonus_claimed'] else True)
     ref_link = f"{request.host_url}?ref={phone}"
     return jsonify({
@@ -97,6 +105,7 @@ def crash():
     r=random.random()
     c=round(random.uniform(1.0,1.5),2) if r<0.15 else round(random.uniform(1.5,10),2) if r<0.85 else round(random.uniform(10,100),2)
     history.append(c); return jsonify({"crash": c})
+
 @app.route('/api/history')
 def hist(): return jsonify(list(history))
 
@@ -107,8 +116,7 @@ def bet():
     amount=float(request.json.get('amount',0))
     if amount<10: return jsonify({"success": False, "error": "Min 10"})
     total=u['real']+u['bonus']+u['ref_bonus']
-    if total<amount: return jsonify({"success": False, "error": "No balance - Deposit 199 to unlock bonus"})
-    # deduct real first, then bonus, then ref_bonus
+    if total<amount: return jsonify({"success": False, "error": "No balance - Deposit 199"})
     if u['real']>=amount: u['real']-=amount
     elif u['real']+u['bonus']>=amount:
         remain=amount-u['real']; u['real']=0; u['bonus']-=remain
@@ -133,25 +141,18 @@ def deposit():
     phone, u = get_user()
     if not u: return jsonify({"success": False, "error": "Login"})
     amt=float(request.json.get('amount',0))
-    # FIRST DEPOSIT RULE: must be 199 to unlock bonus
     if not u['first_deposit_done']:
-        if amt < 199: return jsonify({"success": False, "error": "First deposit must be 199 to unlock KES 1000 bonus"})
-        u['real']+=amt
-        u['bonus']+=1000.0
-        u['bonus_claimed']=True
-        u['bonus_locked']=False # unlock directly as you requested
-        u['first_deposit_done']=True
-        u['deposited']+=amt
+        if amt < 199: return jsonify({"success": False, "error": "First deposit must be 199"})
+        u['real']+=amt; u['bonus']+=1000.0; u['bonus_claimed']=True; u['bonus_locked']=False
+        u['first_deposit_done']=True; u['deposited']+=amt
         u['transactions'].append({"type":"FIRST DEPOSIT","amount":amt,"time":datetime.now().isoformat(),"status":"Success"})
         u['transactions'].append({"type":"WELCOME BONUS","amount":1000,"time":datetime.now().isoformat(),"status":"Unlocked"})
-        # REFERRAL BONUS to referrer
         ref_phone = u.get('referrer')
         if ref_phone and ref_phone in users_db:
             ref_u = users_db[ref_phone]
-            ref_u['ref_bonus']+=300.0
-            ref_u['referral_earnings']+=300.0
-            ref_u['transactions'].append({"type":f"REFERRAL BONUS from {phone}","amount":300,"time":datetime.now().isoformat(),"status":"Bonus - Need 10000 to withdraw"})
-        return jsonify({"success": True, "msg": f"Deposited {amt} + 1000 Bonus = {amt+1000} Total"})
+            ref_u['ref_bonus']+=300.0; ref_u['referral_earnings']+=300.0
+            ref_u['transactions'].append({"type":f"REFERRAL BONUS from {phone}","amount":300,"time":datetime.now().isoformat(),"status":"Bonus"})
+        return jsonify({"success": True, "msg": f"Deposited {amt} + 1000 Bonus"})
     else:
         if amt < 99: return jsonify({"success": False, "error": "Min deposit 99"})
         u['real']+=amt; u['deposited']+=amt
@@ -165,17 +166,19 @@ def withdraw():
     amt=float(request.json.get('amount',0))
     total=u['real']+u['bonus']+u['ref_bonus']
     limit = 10000 if (u['bonus_claimed'] or u['ref_bonus']>0) else 200
-    if total < limit: return jsonify({"success": False, "error": f"Need {limit} to withdraw. You have {total:.0f}. Keep playing!"})
+    if total < limit: return jsonify({"success": False, "error": f"Need {limit} to withdraw"})
     if amt < 200: return jsonify({"success": False, "error": "Min withdraw 200"})
-    if amt > u['real']: return jsonify({"success": False, "error": "Withdraw only REAL balance. Play bonus first to convert to real"})
+    if amt > u['real']: return jsonify({"success": False, "error": "Withdraw only REAL balance"})
     u['real']-=amt
     req = {"id": len(all_withdraw_requests)+1, "phone": phone, "amount": amt, "time": datetime.now().isoformat(), "status": "PENDING"}
     all_withdraw_requests.append(req)
-    u['transactions'].append({"type":"WITHDRAW REQUEST","amount":-amt,"time":datetime.now().isoformat(),"status":"PENDING - Admin Approval"})
-    return jsonify({"success": True, "msg": f"KES {amt} request sent - Awaiting Admin to {phone}"})
+    u['transactions'].append({"type":"WITHDRAW REQUEST","amount":-amt,"time":datetime.now().isoformat(),"status":"PENDING"})
+    return jsonify({"success": True})
 
 @app.route('/api/admin-data')
 def admin_data():
+    if not session.get('is_admin'):
+        return jsonify({"error": "Not admin"}), 401
     return jsonify({
         "users": [{"phone":k,"real":v['real'],"bonus":v['bonus'],"ref_bonus":v['ref_bonus'],"deposited":v['deposited'],"referrer":v['referrer'],"referrals":len(v['referrals'])} for k,v in users_db.items()],
         "withdraws": all_withdraw_requests[::-1], "total_users": len(users_db)
@@ -183,6 +186,8 @@ def admin_data():
 
 @app.route('/api/admin-approve', methods=['POST'])
 def approve():
+    if not session.get('is_admin'):
+        return jsonify({"success": False}), 401
     wid=int(request.json.get('id',0))
     for r in all_withdraw_requests:
         if r['id']==wid: r['status']="APPROVED"
