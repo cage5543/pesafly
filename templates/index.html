@@ -1,0 +1,213 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>PesaFly V13.9 - Referral & 199 Unlock</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+body{background:#0a0e14;color:#fff}
+.top{height:60px;background:#141b25;display:flex;justify-content:space-between;align-items:center;padding:0 12px;border-bottom:1px solid #1f2a38;position:sticky;top:0;z-index:50}
+.bal{color:#00ff88;font-weight:900;background:#0f151e;padding:6px 12px;border-radius:20px;border:1px solid #1f2a38;font-size:13px}
+.topRight{display:flex;gap:6px;align-items:center}
+.btnTop{padding:7px 12px;border-radius:20px;border:none;font-weight:900;font-size:11px;cursor:pointer}
+.btnDep{background:linear-gradient(90deg,#2979ff,#1565c0);color:#fff}
+.btnWith{background:linear-gradient(90deg,#00c853,#009624);color:#fff}
+.btnLogin{background:#0f151e;border:1px solid #2a3a4f;color:#fff}
+.btnReg{background:linear-gradient(90deg,#ff8f00,#ff6f00);color:#fff}
+.banner{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;cursor:pointer}
+.banner-first{background:linear-gradient(90deg,#ff8f00,#ff6f00);color:#fff}
+.banner-unlocked{background:linear-gradient(90deg,#00c853,#009624);color:#fff}
+.banner-ref{background:linear-gradient(90deg,#2979ff,#6a1b9a);color:#fff}
+.hist{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:#0f151e}
+.hist span{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:800;border:1px solid #333;flex-shrink:0}
+.main{display:flex;flex-wrap:wrap}
+.game{flex:2;min-width:380px;height:540px;position:relative;background:radial-gradient(circle at 20% 80%,#1a2b45,#0a0e14);overflow:hidden;border-right:1px solid #1f2a38}
+#graphCanvas{width:100%;height:100%}
+#plane{position:absolute;left:20px;bottom:30px;font-size:34px;z-index:5;transition:all 0.08s linear}
+#mult{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:84px;font-weight:900}
+#mult.green{color:#00ff88}#mult.red{color:#ff2040}
+#timerBar{position:absolute;top:0;left:0;width:100%;height:5px;background:#00ff88}
+#roundStatus{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:800;z-index:9;border:1px solid #2a3a4f}
+.right{flex:1;min-width:360px;background:#141b25;display:flex;flex-direction:column;max-height:540px}
+.betGrid{display:flex;gap:8px;padding:8px}
+.betCard{flex:1;background:#1b2533;border-radius:14px;padding:10px;border:1px solid #243040}
+.amountRow{display:flex;align-items:center;gap:6px;background:#0f151e;border:1px solid #2a3a4f;border-radius:10px;padding:4px;margin-top:4px}
+.amountRow button{background:#243040;color:#fff;border:none;width:28px;height:28px;border-radius:8px;font-weight:900;cursor:pointer}
+.amountRow input{flex:1;background:transparent;border:none;color:#fff;text-align:center;font-weight:800;outline:none}
+.autoRow{display:flex;justify-content:space-between;margin:7px 0;font-size:10px}
+.autoCashBox{display:flex;gap:4px;background:#0f151e;border:1px solid #2a3a4f;border-radius:8px;padding:4px 6px}
+.autoCashBox input{width:45px;background:transparent;border:none;color:#ffca28;font-weight:800;text-align:center;outline:none}
+.btn{width:100%;padding:11px;border:none;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer;margin-top:6px}
+.btn-bet{background:linear-gradient(#00c853,#009624);color:#fff}
+.btn-cash{background:#ffca28;color:#000}
+.btn-cashed{background:#2979ff;color:#fff}
+.btn-crash{background:#ff2040;color:#fff}
+.btn-wait{background:#2a3a4f;color:#8a9bb0}
+.players{flex:1;overflow-y:auto;background:#0f151e;border-top:1px solid #1f2a38}
+.pHead{display:flex;justify-content:space-between;padding:8px 10px;font-size:10px;color:#8a9bb0;background:#141b25;position:sticky;top:0}
+.p-row{display:flex;justify-content:space-between;padding:6px 10px;font-size:11px;border-bottom:1px solid #1a2533}
+.p-row.blue{color:#2979ff;background:rgba(41,121,255,0.12);font-weight:800}
+.p-row.red{color:#ff2040;background:rgba(255,32,64,0.12);font-weight:800}
+.input{width:100%;padding:10px;background:#0f151e;border:1px solid #2a3a4f;color:#fff;border-radius:8px;margin:5px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100}
+.modalBox{background:#1b2533;padding:18px;border-radius:16px;width:94%;max-width:420px;border:1px solid #2a3a4f;max-height:90vh;overflow-y:auto}
+.link{color:#2979ff;font-size:11px;cursor:pointer;text-decoration:underline;margin-top:8px;display:block;text-align:center}
+.tabBtn{padding:6px 10px;border-radius:20px;border:1px solid #2a3a4f;background:#0f151e;color:#8a9bb0;font-size:11px;font-weight:800;cursor:pointer;margin-right:6px}
+.tabBtn.active{background:#2979ff;color:#fff}
+.tx-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1f2a38;font-size:11px}
+</style></head><body>
+<div class="top">
+<div style="display:flex;align-items:center;gap:8px"><b>✈️ PESAFLY</b><span id="uPhone" style="font-size:10px;color:#8a9bb0">Guest</span></div>
+<div class="topRight">
+<div id="authTop" style="display:flex;gap:6px"><button class="btnTop btnLogin" onclick="openModal('loginModal')">LOGIN</button><button class="btnTop btnReg" onclick="openModal('registerModal')">REGISTER</button></div>
+<div id="loggedTop" style="display:none;gap:6px;align-items:center">
+<span class="bal" id="bal">KES 0</span>
+<button class="btnTop btnDep" onclick="openModal('depModal')">DEPOSIT</button>
+<button class="btnTop btnWith" onclick="openModal('withModal')">WITHDRAW</button>
+<button class="btnTop btnLogin" style="background:#2979ff;color:#fff" onclick="openModal('referModal')">REFER</button>
+<button class="btnTop btnLogin" onclick="openModal('txModal')">HISTORY</button>
+<button class="btnTop btnLogin" onclick="logout()">OUT</button>
+</div>
+</div>
+</div>
+
+<!-- FIRST DEPOSIT BANNER -->
+<div id="firstBanner" class="banner banner-first" style="display:none" onclick="openModal('depModal')">
+<div><span id="firstText">🎁 Deposit KES 199 to unlock KES 1000 BONUS - Total 1199!</span> | R:<span id="realBal">0</span> B:<span id="bonusBal">0</span> Ref:<span id="refBal">0</span></div>
+<span id="firstNeed">DEPOSIT 199</span>
+</div>
+
+<div id="unlockedBanner" class="banner banner-unlocked" style="display:none">
+<div><span id="unlockedText">✅ BONUS UNLOCKED</span> | R:<span id="realBal2">0</span> B:<span id="bonusBal2">0</span> Ref:<span id="refBal2">0</span> | Total: <span id="totalBal">0</span></div>
+<span id="limitText">Limit: 10000</span>
+</div>
+
+<div class="hist" id="hist"></div>
+
+<div class="main">
+<div class="game"><div id="timerBar"></div><div id="roundStatus">BETTING 5.0s</div><canvas id="graphCanvas"></canvas><div id="plane">✈️</div><div id="mult" class="green">1.00x</div></div>
+<div class="right">
+<div class="betGrid">
+<div class="betCard"><h4>BET 1</h4><div class="amountRow"><button onclick="chg(1,-10)">-</button><input id="bet1" type="number" value="50"><button onclick="chg(1,10)">+</button></div><div class="autoRow"><label><input type="checkbox" id="autoPlay1"> Auto</label><div class="autoCashBox"><input type="checkbox" id="autoCash1" checked><input id="autoVal1" type="number" value="2.00" step="0.1"></div></div><button id="btn1" class="btn btn-bet" onclick="betAction(1)">BET KES 50</button><p id="info1" style="font-size:9px;text-align:center;color:#8a9bb0;margin-top:3px">Login</p></div>
+<div class="betCard"><h4>BET 2</h4><div class="amountRow"><button onclick="chg(2,-10)">-</button><input id="bet2" type="number" value="100"><button onclick="chg(2,10)">+</button></div><div class="autoRow"><label><input type="checkbox" id="autoPlay2"> Auto</label><div class="autoCashBox"><input type="checkbox" id="autoCash2" checked><input id="autoVal2" type="number" value="3.00" step="0.1"></div></div><button id="btn2" class="btn btn-bet" onclick="betAction(2)">BET KES 100</button><p id="info2" style="font-size:9px;text-align:center;color:#8a9bb0;margin-top:3px">Login</p></div>
+</div>
+<div class="players"><div class="pHead"><span>PLAYER</span><span>BET</span><span>X</span><span>WIN</span></div><div id="playersList"></div></div>
+</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginModal" class="modal"><div class="modalBox">
+<h3>LOGIN M-PESA</h3><input id="loginPhone" class="input" placeholder="07..." type="tel"><input id="loginPass" class="input" type="password" placeholder="Password">
+<button class="btn btn-bet" onclick="doLogin()">LOGIN</button>
+<span class="link" onclick="closeModal('loginModal');openModal('forgotModal')">Forgot?</span>
+<span class="link" onclick="closeModal('loginModal');openModal('registerModal')">Register</span>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:6px" onclick="closeModal('loginModal')">CLOSE</button>
+<p id="loginErr" style="color:#ff2040;font-size:11px;margin-top:6px"></p>
+</div></div>
+
+<!-- REGISTER WITH REF -->
+<div id="registerModal" class="modal"><div class="modalBox">
+<h3>REGISTER M-PESA</h3><p style="font-size:11px;color:#00ff88" id="refInfo">Get 1000 Bonus after first deposit 199</p>
+<input id="regPhone" class="input" placeholder="M-Pesa 07..." type="tel">
+<input id="regRef" class="input" placeholder="Referral Code (Optional)" type="tel">
+<input id="regPass" class="input" type="password" placeholder="Password">
+<input id="regPass2" class="input" type="password" placeholder="Confirm">
+<button class="btn" style="background:linear-gradient(90deg,#ff8f00,#ff6f00)" onclick="doRegister()">CREATE ACCOUNT</button>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:6px" onclick="closeModal('registerModal')">CLOSE</button>
+<p id="regErr" style="color:#ff2040;font-size:11px;margin-top:6px"></p>
+</div></div>
+
+<!-- FORGOT -->
+<div id="forgotModal" class="modal"><div class="modalBox">
+<h3>RESET</h3><input id="forgotPhone" class="input" placeholder="07..." type="tel"><input id="forgotNewPass" class="input" type="password" placeholder="New Password">
+<button class="btn btn-bet" onclick="doForgot()">RESET</button>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:6px" onclick="closeModal('forgotModal')">CLOSE</button>
+<p id="forgotErr" style="font-size:11px;margin-top:6px"></p>
+</div></div>
+
+<!-- DEPOSIT -->
+<div id="depModal" class="modal"><div class="modalBox">
+<h3 id="depTitle">💳 Deposit</h3><p id="depHint" style="font-size:11px;color:#ffca28"></p>
+<input id="depAmt" class="input" type="number" value="199">
+<button class="btn btn-bet" onclick="deposit()">DEPOSIT NOW</button>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:6px" onclick="closeModal('depModal')">CLOSE</button>
+<p id="depMsg" style="font-size:11px;color:#00ff88;margin-top:6px"></p>
+</div></div>
+
+<!-- WITHDRAW -->
+<div id="withModal" class="modal"><div class="modalBox">
+<h3>💰 Withdraw to M-Pesa</h3><p id="withLimitInfo" style="font-size:11px;color:#ffca28"></p>
+<input id="withAmt" class="input" type="number" value="200">
+<button class="btn" style="background:#00e676;color:#000" onclick="withdraw()">WITHDRAW</button>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:6px" onclick="closeModal('withModal')">CLOSE</button>
+<p id="withMsg" style="font-size:11px;color:#ffca28;margin-top:6px"></p>
+</div></div>
+
+<!-- REFERRAL MODAL -->
+<div id="referModal" class="modal"><div class="modalBox">
+<h3>👥 Refer & Earn 300</h3><p style="font-size:11px;color:#8a9bb0;margin:6px 0">Share your link, friend deposits 199, you get 300. Need 10000 to withdraw referral bonus.</p>
+<input id="refLink" class="input" readonly>
+<button class="btn btn-bet" onclick="copyRef()">COPY LINK</button>
+<div style="margin-top:12px"><b>My Referrals: <span id="refCount">0</span></b> | Earned: <span id="refEarned">0</span></div>
+<div id="refList" style="margin-top:8px;font-size:11px"></div>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:10px" onclick="closeModal('referModal')">CLOSE</button>
+</div></div>
+
+<!-- TX + BETS MODAL -->
+<div id="txModal" class="modal"><div class="modalBox" style="max-width:480px">
+<h3>📜 My History</h3>
+<div style="margin:10px 0"><button class="tabBtn active" id="tabTx" onclick="showTab('tx')">Transactions</button><button class="tabBtn" id="tabBets" onclick="showTab('bets')">Betting History</button><button class="tabBtn" id="tabRef" onclick="showTab('ref')">Referrals</button></div>
+<div id="txTab"></div><div id="betsTab" style="display:none"></div><div id="refTab" style="display:none"></div>
+<button class="btn" style="background:#0f151e;border:1px solid #2a3a4f;margin-top:10px" onclick="closeModal('txModal')">CLOSE</button>
+</div></div>
+
+<script>
+function openModal(id){document.getElementById(id).style.display='flex'; if(id==='referModal'||id==='txModal')checkMe();}
+function closeModal(id){document.getElementById(id).style.display='none';}
+function showTab(t){document.getElementById('txTab').style.display=t==='tx'?'block':'none';document.getElementById('betsTab').style.display=t==='bets'?'block':'none';document.getElementById('refTab').style.display=t==='ref'?'block':'none';document.getElementById('tabTx').className=t==='tx'?'tabBtn active':'tabBtn';document.getElementById('tabBets').className=t==='bets'?'tabBtn active':'tabBtn';document.getElementById('tabRef').className=t==='ref'?'tabBtn active':'tabBtn';}
+let logged=false,trail=[],mult=1,crash=2.5,timer=null,bettingTimer=null,roundState='BETTING',bettingTime=5,playing=false;
+let bets={1:{active:false,amount:0,placed:false},2:{active:false,amount:0,placed:false}};let livePlayers=[];
+const canvas=document.getElementById('graphCanvas'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=canvas.parentElement.clientWidth*2;canvas.height=canvas.parentElement.clientHeight*2;}resize();addEventListener('resize',resize);
+async function api(u,d=null){try{let o={headers:{'Content-Type':'application/json'}};if(d){o.method='POST';o.body=JSON.stringify(d);}let r=await fetch(u,o);return await r.json();}catch(e){return null;}}
+function localCrash(){let r=Math.random();return r<0.15?+(Math.random()*0.5+1).toFixed(2):r<0.85?+(Math.random()*8+1.5).toFixed(2):+(Math.random()*50+10).toFixed(2);}
+function chg(n,delta){let inp=document.getElementById('bet'+n);let v=parseFloat(inp.value)+delta;if(v<10)v=10;inp.value=v;if(!bets[n].active)document.getElementById('btn'+n).innerText='BET KES '+v;}
+// HANDLE REF PARAM
+(function(){let url=new URL(window.location.href);let ref=url.searchParams.get('ref');if(ref){localStorage.setItem('pending_ref',ref);api('/api/set-ref',{ref:ref});document.getElementById('regRef').value=ref;document.getElementById('refInfo').innerText='🎉 Referred! Register & deposit 199 to get bonus';openModal('registerModal');}})();
+async function checkMe(){let d=await api('/api/me');if(d&&d.logged){logged=true;document.getElementById('uPhone').innerText=d.phone;document.getElementById('authTop').style.display='none';document.getElementById('loggedTop').style.display='flex';updateUI(d);}else{logged=false;document.getElementById('uPhone').innerText='Guest';document.getElementById('authTop').style.display='flex';document.getElementById('loggedTop').style.display='none';document.getElementById('firstBanner').style.display='none';document.getElementById('unlockedBanner').style.display='none';}}
+function updateUI(d){
+document.getElementById('realBal').innerText='KES '+d.real.toFixed(0);document.getElementById('bonusBal').innerText='KES '+d.bonus.toFixed(0);document.getElementById('refBal').innerText='KES '+d.ref_bonus.toFixed(0);
+document.getElementById('realBal2').innerText='KES '+d.real.toFixed(0);document.getElementById('bonusBal2').innerText='KES '+d.bonus.toFixed(0);document.getElementById('refBal2').innerText='KES '+d.ref_bonus.toFixed(0);
+document.getElementById('totalBal').innerText='KES '+d.total.toFixed(0);
+document.getElementById('bal').innerText='KES '+d.total.toFixed(0);
+document.getElementById('limitText').innerText='Limit: '+d.withdraw_limit;
+document.getElementById('withLimitInfo').innerText='Min withdraw 200 | Your limit: '+d.withdraw_limit+' | Balance: '+d.total.toFixed(0)+' (Need '+d.withdraw_limit+' to withdraw)';
+if(!d.first_deposit_done){
+document.getElementById('firstBanner').style.display='flex';document.getElementById('unlockedBanner').style.display='none';
+document.getElementById('depTitle').innerText='💳 First Deposit 199 - Unlock 1000 Bonus';document.getElementById('depHint').innerText='First deposit MUST be 199 to unlock 1000 bonus. You will get 1199 total instantly.';
+document.getElementById('depAmt').value=199;
+}else{
+document.getElementById('firstBanner').style.display='none';document.getElementById('unlockedBanner').style.display='flex';
+document.getElementById('unlockedText').innerText=d.bonus_claimed?'✅ BONUS UNLOCKED - 199+1000':'✅ Playing Real Money';
+document.getElementById('depTitle').innerText='💳 Deposit';document.getElementById('depHint').innerText='Min deposit 99';
+if(document.getElementById('depAmt').value==199)document.getElementById('depAmt').value=99;
+}
+document.getElementById('refLink').value=d.ref_link;document.getElementById('refCount').innerText=d.referrals.length;document.getElementById('refEarned').innerText='KES '+d.referral_earnings.toFixed(0);
+// transactions tab
+let txHtml='';d.transactions.forEach(t=>{txHtml+=`<div class="tx-row"><span>${t.type}<br><small style="color:#8a9bb0">${t.time.substring(11,19)}</small></span><span style="color:${t.amount>=0?'#00ff88':'#ffca28'}">${t.amount>=0?'+':''}${t.amount}<br><small style="color:#8a9bb0">${t.status}</small></span></div>`;});document.getElementById('txTab').innerHTML=txHtml||'No transactions';
+let betHtml='';d.bets.forEach(b=>{betHtml+=`<div class="tx-row"><span>BET ${b.amount} @ ${b.multi?b.multi.toFixed(2)+'x':'--'}<br><small>${b.time.substring(11,19)}</small></span><span style="color:${b.status.includes('WON')?'#00ff88':'#ff2040'}">${b.status}<br><small>${b.win?'+'+b.win:''}</small></span></div>`;});document.getElementById('betsTab').innerHTML=betHtml||'No bets';
+let refHtml='';d.referrals.forEach(r=>{refHtml+=`<div class="tx-row"><span>👤 ${r}</span><span style="color:#00ff88">+300</span></div>`;});document.getElementById('refTab').innerHTML=refHtml||'No referrals yet';document.getElementById('refList').innerHTML=refHtml||'No referrals';document.getElementById('withMsg').innerText=d.can_withdraw?'Ready to withdraw':'Need '+d.withdraw_limit;
+}checkMe();
+async function doRegister(){let ph=document.getElementById('regPhone').value,p=document.getElementById('regPass').value,p2=document.getElementById('regPass2').value,ref=document.getElementById('regRef').value||localStorage.getItem('pending_ref');if(p!==p2){document.getElementById('regErr').innerText='Passwords not same';return;}let d=await api('/api/auth',{phone:ph,password:p,ref:ref,action:'register'});if(!d||!d.success){document.getElementById('regErr').innerText=d?d.error:'Error';return;}closeModal('registerModal');localStorage.removeItem('pending_ref');checkMe();openModal('depModal');}
+async function doLogin(){let ph=document.getElementById('loginPhone').value,p=document.getElementById('loginPass').value;let d=await api('/api/auth',{phone:ph,password:p,action:'login'});if(!d||!d.success){document.getElementById('loginErr').innerText=d?d.error:'Error';return;}closeModal('loginModal');checkMe();}
+async function doForgot(){let ph=document.getElementById('forgotPhone').value,np=document.getElementById('forgotNewPass').value;let d=await api('/api/forgot',{phone:ph,new_password:np});let el=document.getElementById('forgotErr');if(!d||!d.success){el.style.color='#ff2040';el.innerText=d?d.error:'Error';return;}el.style.color='#00ff88';el.innerText=d.msg;}
+async function logout(){await api('/api/logout');checkMe();}
+async function deposit(){let amt=parseFloat(document.getElementById('depAmt').value);let d=await api('/api/deposit',{amount:amt});let el=document.getElementById('depMsg');if(!d||!d.success){el.style.color='#ff2040';el.innerText=d?d.error:'Error';return;}el.style.color='#00ff88';el.innerText=d.msg||'Success!';checkMe();setTimeout(()=>closeModal('depModal'),1200);}
+async function withdraw(){let amt=parseFloat(document.getElementById('withAmt').value);let d=await api('/api/withdraw',{amount:amt});document.getElementById('withMsg').innerText=d?(d.error||d.msg):'Error';if(d&&d.success){checkMe();}}
+function copyRef(){let inp=document.getElementById('refLink');inp.select();document.execCommand('copy');alert('Copied: '+inp.value);}
+async function loadHist(){let h=await api('/api/history');if(!h)return;let bar=document.getElementById('hist');bar.innerHTML='';h.forEach(v=>{let c=v<2?'#ff2040':v<10?'#ffca28':'#00ff88';bar.innerHTML+=`<span style="color:${c};border-color:${c}">${v.toFixed(2)}x</span>`;});}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='#162032';ctx.lineWidth=2;for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(0,canvas.height*i/6);ctx.lineTo(canvas.width,canvas.height*i/6);ctx.stroke();}if(trail.length>1){ctx.beginPath();ctx.strokeStyle='#00ff88';ctx.lineWidth=6;ctx.lineJoin='round';ctx.moveTo(trail[0].x,trail[0].y);for(let i=1;i<trail.length;i++)ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();let grad=ctx.createLinearGradient(0,0,0,canvas.height);grad.addColorStop(0,'rgba(0,255,136,0.28)');grad.addColorStop(1,'rgba(0,255,136,0)');ctx.lineTo(trail[trail.length-1].x,canvas.height);ctx.lineTo(trail[0].x,canvas.height);ctx.closePath();ctx.fillStyle=grad;ctx.fill();}}
+function generateLivePlayers(){livePlayers=[];for(let i=0;i<70;i++){livePlayers.push({name:"07"+Math.floor(Math.random()*90000000+10000000).toString().substring(0,2)+"***"+Math.floor(Math.random()*90+10), bet:[20,50,100,200,500][Math.floor(Math.random()*5)], target:+(Math.random()*12+1.2).toFixed(2), status:'playing', win:0});}}
+function renderPlayers(){let div=document.getElementById('playersList');div.innerHTML='';livePlayers.forEach(pl=>{let cls='';let xText='';let winText='';if(pl.status==='cashed'){cls='blue';xText=pl.target.toFixed(2)+'x';winText='KES '+(pl.bet*pl.target).toFixed(0);}else if(pl.status==='crashed'){cls='red';xText='💥';winText='LOST';}else{if(playing && mult>=pl.target){pl.status='cashed';pl.win=pl.bet*pl.target;cls='blue';xText=pl.target.toFixed(2)+'x';winText='KES '+pl.win.toFixed(0);}else if(!playing && roundState==='CRASHED' && pl.status==='playing'){pl.status='crashed';cls='red';xText='CRASH';winText='LOST';}else{xText='--';winText='--';}}div.innerHTML+=`<div class="p-row ${cls}"><span>${pl.name}</span><span>${pl.bet}</span><span>${xText}</span><span>${winText}</span></div>`;});}
+async function gameLoop(){roundState='BETTING';bettingTime=5.0;trail=[];draw();mult=1;playing=false;document.getElementById('plane').innerText='✈️';document.getElementById('plane').style.left='20px';document.getElementById('plane').style.bottom='30px';document.getElementById('mult').innerText='1.00x';document.getElementById('mult').className='green';document.getElementById('timerBar').style.background='#00ff88';bets[1].placed=false;bets[2].placed=false;generateLivePlayers();renderPlayers();[1,2].forEach(k=>{if(!bets[k].active){document.getElementById('btn'+k).className='btn btn-bet';document.getElementById('btn'+k).innerText='BET KES '+document.getElementById('bet'+k).value;document.getElementById('info'+k).innerText=logged?'Ready':'Login';}});let data=await api('/api/crash');crash=data&&data.crash?data.crash:localCrash();bettingTimer=setInterval(()=>{bettingTime-=0.1;if(bettingTime<0)bettingTime=0;document.getElementById('roundStatus').innerText=`BETTING OPEN - ${bettingTime.toFixed(1)}s`;document.getElementById('timerBar').style.width=(bettingTime/5*100)+'%';if(bettingTime<=0){clearInterval(bettingTimer);startFlying();}},100);}
+function startFlying(){roundState='FLYING';playing=true;document.getElementById('roundStatus').innerText=`FLYING!`;document.getElementById('timerBar').style.width='100%';document.getElementById('timerBar').style.background='#ffca28';[1,2].forEach(k=>{if(bets[k].active){bets[k].placed=true;document.getElementById('btn'+k).className='btn btn-cash';}else{document.getElementById('btn'+k).className='btn btn-wait';document.getElementById('btn'+k).innerText='CLOSED';}});timer=setInterval(()=>{mult+=0.02+mult*0.014;document.getElementById('mult').innerText=mult.toFixed(2)+'x';let x=(mult*24)*(canvas.width/400);let y=canvas.height-(Math.log(mult+1)*125)-20;if(trail.length>220)trail.shift();trail.push({x:x,y:y});draw();document.getElementById('plane').style.left=(x/2-10)+'px';document.getElementById('plane').style.bottom=(canvas.height/2 - y/2 +190)+'px';renderPlayers();[1,2].forEach(k=>{if(bets[k].active&&bets[k].placed){let cur=bets[k].amount*mult;document.getElementById('btn'+k).innerText=`CASHOUT ${cur.toFixed(0)} - ${mult.toFixed(2)}x`;let autoC=document.getElementById('autoCash'+k).checked;let autoV=parseFloat(document.getElementById('autoVal'+k).value);if(autoC&&mult>=autoV)cashOne(k);}});if(mult>=crash){clearInterval(timer);playing=false;roundState='CRASHED';document.getElementById('mult').innerText='CRASHED '+crash.toFixed(2)+'x';document.getElementById('mult').className='red';document.getElementById('plane').innerText='💥';[1,2].forEach(k=>{if(bets[k].active&&bets[k].placed){let b=document.getElementById('btn'+k);b.className='btn btn-crash';b.innerText=`LOST @ ${crash.toFixed(2)}x`;document.getElementById('info'+k).innerText=`Lost`;bets[k].active=false;}});renderPlayers();loadHist();let cd=3.0;let cdTimer=setInterval(()=>{cd-=0.1;if(cd<0)cd=0;document.getElementById('roundStatus').innerText=`CRASHED @ ${crash.toFixed(2)}x - Next ${cd.toFixed(1)}s`;document.getElementById('timerBar').style.width=(cd/3*100)+'%';document.getElementById('timerBar').style.background='#ff2040';if(cd<=0){clearInterval(cdTimer);[1,2].forEach(k=>{if(document.getElementById('autoPlay'+k).checked){setTimeout(()=>betAction(k),200);}});gameLoop();}},100);}},65);}
+async function betAction(n){if(!logged){openModal('loginModal');return;}if(roundState!=='BETTING'){alert('Betting closed');return;}let amt=parseFloat(document.getElementById('bet'+n).value);if(!bets[n].active){let d=await api('/api/bet',{amount:amt});if(!d||!d.success){alert(d?d.error:'No balance');return;}bets[n].active=true;bets[n].amount=amt;checkMe();document.getElementById('btn'+n).innerText=`PLACED KES ${amt}`;}}
+async function cashOne(n){if(!bets[n].active||!bets[n].placed)return;let d=await api('/api/cashout',{bet:bets[n].amount,multiplier:mult});let win=bets[n].amount*mult;bets[n].active=false;bets[n].placed=false;let b=document.getElementById('btn'+n);b.className='btn btn-cashed';b.innerText=`CASHED ${mult.toFixed(2)}x +${win.toFixed(0)}`;document.getElementById('info'+n).innerText=`Won ${win.toFixed(0)}`;checkMe();}
+setTimeout(()=>{loadHist();gameLoop();},700);
+</script></body></html>
