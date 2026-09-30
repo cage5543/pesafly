@@ -1,17 +1,48 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin - PesaFly</title>
-<style>body{margin:0;background:#0a0e14;color:#fff;font-family:Arial;padding:16px}.card{background:#141b25;padding:16px;border-radius:12px;margin-bottom:12px;border:1px solid #1f2a38} input,button{padding:10px;border-radius:8px;border:none;margin:4px} input{background:#0f151e;color:#fff;border:1px solid #2a3a4f} button{background:#2979ff;color:#fff;font-weight:800;cursor:pointer} table{width:100%;border-collapse:collapse;font-size:12px} th,td{padding:8px;border-bottom:1px solid #1f2a38;text-align:left} th{color:#8a9bb0}</style></head><body>
-<h2>✈️ PesaFly V13 PRO - ADMIN</h2>
-<div id="login" class="card"><input id="apass" type="password" placeholder="Admin Password"><button onclick="adminLogin()">LOGIN</button><p id="aerr" style="color:#ff2040"></p><p style="font-size:11px;color:#666">Default: PesaAdmin123</p></div>
-<div id="panel" style="display:none">
-<div class="card" style="display:flex;gap:12px;flex-wrap:wrap"><div><b>Users:</b> <span id="sUsers">0</span></div><div><b>Total Deposits:</b> <span id="sDep">0</span></div><div><b>Real Bal:</b> <span id="sReal">0</span></div><div><b>Bonus Bal:</b> <span id="sBonus">0</span></div><button onclick="loadStats()">Refresh</button></div>
-<div class="card"><h3>Add Balance</h3><input id="uEmail" placeholder="user email"><input id="uAmt" type="number" placeholder="Amount"><select id="uType" style="padding:10px;border-radius:8px;background:#0f151e;color:#fff"><option value="real">Real</option><option value="bonus">Bonus</option><option value="deposit">Deposit Total</option></select><button onclick="addBal()">Add</button></div>
-<div class="card"><h3>All Users - Bonus System</h3><table><thead><tr><th>Email</th><th>Real</th><th>Bonus</th><th>Total</th><th>Deposited</th><th>Locked?</th><th>Bet/Won</th><th>Action</th></tr></thead><tbody id="userTable"></tbody></table></div>
+<!DOCTYPE html>
+<html>
+<head>
+<title>PesaFly Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#111;color:#fff;padding:20px}
+input{padding:12px;width:250px;margin:10px;border-radius:8px;border:none}
+button{padding:12px 20px;background:#00ff88;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
+.card{background:#222;padding:15px;border-radius:12px;margin:10px 0}
+</style>
+</head>
+<body>
+<div id="loginBox">
+<h2>🔒 PesaFly Admin</h2>
+<input id="pwd" type="password" placeholder="Admin Password">
+<button onclick="login()">LOGIN</button>
+<p id="msg"></p>
 </div>
+
+<div id="adminBox" style="display:none">
+<h2>✅ PesaFly Dashboard - LIVE</h2>
+<button onclick="load()">Refresh Data</button>
+<div id="data"></div>
+<h3>Withdraw Requests</h3>
+<div id="withdraws"></div>
+</div>
+
 <script>
-async function api(u,d=null){let o={headers:{'Content-Type':'application/json'}};if(d){o.method='POST';o.body=JSON.stringify(d);}let r=await fetch(u,o);return r.json();}
-async function adminLogin(){let p=document.getElementById('apass').value;let d=await api('/api/admin/login',{password:p});if(!d.success){document.getElementById('aerr').innerText=d.error;return;}document.getElementById('login').style.display='none';document.getElementById('panel').style.display='block';loadStats();loadUsers();}
-async function loadStats(){let d=await api('/api/admin/stats');if(!d.users&&d.users!==0)return;document.getElementById('sUsers').innerText=d.users;document.getElementById('sDep').innerText='KES '+d.deposits.toFixed(2);document.getElementById('sReal').innerText='KES '+d.real_bal.toFixed(2);document.getElementById('sBonus').innerText='KES '+d.bonus_bal.toFixed(2);}
-async function loadUsers(){let users=await api('/api/admin/users');let tb=document.getElementById('userTable');tb.innerHTML='';users.forEach(u=>{tb.innerHTML+=`<tr><td>${u.email}</td><td>${u.real.toFixed(2)}</td><td>${u.bonus.toFixed(2)}</td><td><b>${u.total.toFixed(2)}</b></td><td>${u.deposited.toFixed(2)}</td><td>${u.locked?'🔒 LOCKED':'✅ UNLOCKED'}</td><td>${u.bet.toFixed(0)}/${u.won.toFixed(0)}</td><td><button onclick="delUser('${u.email}')" style="background:#ff2040">Delete</button></td></tr>`;});}
-async function addBal(){let e=document.getElementById('uEmail').value,a=document.getElementById('uAmt').value,t=document.getElementById('uType').value;let d=await api('/api/admin/update',{email:e,amount:parseFloat(a),type:t});if(d.success){alert('Added');loadUsers();loadStats();}}
-async function delUser(email){if(!confirm('Delete '+email+'?'))return;await api('/api/admin/delete',{email:email});loadUsers();loadStats();}
-</script></body></html>
+async function login(){
+ let p=document.getElementById('pwd').value;
+ let r=await fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})});
+ let j=await r.json();
+ if(j.success){document.getElementById('loginBox').style.display='none';document.getElementById('adminBox').style.display='block';load();}
+ else{ document.getElementById('msg').innerText=j.error; }
+}
+async function load(){
+ let r=await fetch('/api/admin-data'); let j=await r.json();
+ if(j.error){ document.getElementById('msg').innerText='Login first'; return; }
+ document.getElementById('data').innerHTML=`<div class=card>Total Users: ${j.total_users}</div>`+j.users.map(u=>`<div class=card>${u.phone} - Real:${u.real} Bonus:${u.bonus} Ref:${u.ref_bonus} Deposited:${u.deposited} Referrals:${u.referrals}</div>`).join('');
+ document.getElementById('withdraws').innerHTML=j.withdraws.map(w=>`<div class=card>${w.phone} - KES ${w.amount} - ${w.status} <button onclick="approve(${w.id})">APPROVE</button></div>`).join('');
+}
+async function approve(id){
+ await fetch('/api/admin-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); load();
+}
+</script>
+</body>
+</html>
