@@ -8,9 +8,9 @@ body{background:#0f0f0f;color:#fff}
 .menu-btn{font-size:22px;background:none;border:none;color:#fff;cursor:pointer}
 .btn-dep{background:#ff8f00;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:900}
 .top-r{display:flex;gap:10px;align-items:center;font-size:12px}.bal{color:#00ff88;font-weight:900}
-.graph-box{background:#1e1e1e;margin:8px;border-radius:8px;position:relative;height:360px;overflow:hidden;border:1px solid #333}
-#mult{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:64px;font-weight:900;color:#ffca28;z-index:5;text-align:center;width:100%}
-#mult small{display:block;font-size:14px;color:#fff;margin-top:6px;font-weight:400}
+.graph-box{background:#121212;margin:8px;border-radius:8px;position:relative;height:380px;overflow:hidden;border:1px solid #333}
+#mult{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#ffca28;z-index:5;text-align:center;width:100%;text-shadow:0 0 10px rgba(255,202,40,0.5)}
+#mult small{display:block;font-size:15px;color:#fff;margin-top:8px;font-weight:400;opacity:0.9}
 .hist-pills{display:flex;gap:6px;padding:6px 8px;overflow-x:auto;background:#1a1a1a}.pill{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
 .banner{background:#1a1a1a;border:1px solid #ff8f00;margin:8px;border-radius:6px;padding:10px;display:flex;justify-content:space-between;font-size:12px}.banner b{color:#ff8f00}
 .table-wrap{max-height:380px;overflow-y:auto;background:#1a1a1a;margin:8px;border-radius:8px}
@@ -28,28 +28,25 @@ body{background:#0f0f0f;color:#fff}
 </style></head><body>
 <div class="top"><button class="menu-btn" onclick="openDrawer()">☰</button><div class="logo"><span>PF</span> PesaFly</div><button class="btn-dep" onclick="openDrawer()">DEPOSIT</button><div class="top-r"><span onclick="openLogin()">LOGIN</span><span style="color:#ff8f00" onclick="openRegister()">REGISTER</span><span class="bal" id="balTop">KES 0</span></div></div>
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer"><div style="display:flex;justify-content:space-between"><b style="color:#ff8f00">☰ MENU - DASHBOARD</b><span onclick="closeDrawer()">x</span></div><div style="margin-top:12px"><h4 style="color:#ff8f00">BAL: <b class="bal" id="bal">KES 0</b></h4><div style="font-size:11px">Real:<span id="realBal">0</span> Bonus:<span id="bonusBal">0</span></div><div id="bonusBar" style="background:#ff8f00;color:#000;padding:8px;border-radius:6px;font-weight:800;font-size:12px;text-align:center;margin-top:8px">Deposit 350 to unlock 1000</div><input id="depAmt" class="input" value="350"><input id="phone" class="input" placeholder="07xxxxxxxx"><button class="btn btn-blue" onclick="deposit()">DEPOSIT</button><button class="btn" style="background:#00ff88;color:#000;display:none" id="claimBtn" onclick="claim()">CLAIM 1000</button><div style="background:#222;padding:8px;border-radius:6px;margin:10px 0"><small id="refLink" style="word-break:break-all">Login to see link</small><br><button onclick="copyRef()" style="background:#ff8f00;color:#000;border:none;padding:5px 8px;border-radius:4px;font-weight:800;margin-top:5px;font-size:11px">COPY LINK</button><div style="font-size:11px">Refs:<span id="refCount">0</span> Earn:<span id="refEarn">0</span></div></div><input id="withAmt" class="input" value="500"><button class="btn btn-blue" onclick="withdraw()">WITHDRAW (3K if bonus)</button><p id="msg" style="font-size:11px;color:#aaa"></p></div></div>
+<div class="drawer" id="drawer"><div style="display:flex;justify-content:space-between"><b style="color:#ff8f00">☰ MENU - DASHBOARD</b><span onclick="closeDrawer()">x</span></div><div style="margin-top:12px"><h4 style="color:#ff8f00">BAL: <b class="bal" id="bal">KES 0</b></h4><div style="font-size:11px">Real:<span id="realBal">0</span> Bonus:<span id="bonusBal">0</span></div><div id="bonusBar" style="background:#ff8f00;color:#000;padding:8px;border-radius:6px;font-weight:800;font-size:12px;text-align:center;margin-top:8px">Deposit 350 to unlock 1000</div><input id="depAmt" class="input" value="350"><input id="phone" class="input" placeholder="07xxxxxxxx"><button class="btn btn-blue" onclick="deposit()">DEPOSIT</button><button class="btn" style="background:#00ff88;color:#000;display:none" id="claimBtn" onclick="claim()">CLAIM 1000</button><div style="background:#222;padding:8px;border-radius:6px;margin:10px 0"><small id="refLink" style="word-break:break-all">Login to see link</small><br><button onclick="copyRef()" style="background:#ff8f00;color:#000;border:none;padding:5px 8px;border-radius:4px;font-weight:800;margin-top:5px;font-size:11px">COPY LINK</button><div style="font-size:11px">Refs:<span id="refCount">0</span> Earn:<span id="refEarn">0</span></div></div><input id="withAmt" class="input" value="500"><button class="btn btn-blue" onclick="withdraw()">WITHDRAW</button><p id="msg" style="font-size:11px;color:#aaa"></p></div></div>
 
-<div class="graph-box"><canvas id="graph" style="width:100%;height:100%"></canvas><div id="mult">5<small>Next round in 5s - Place your bet!</small></div></div>
+<div class="graph-box"><canvas id="graph" style="width:100%;height:100%"></canvas><div id="mult">4<small>Next round in 4s - Place your bet!</small></div></div>
 <div class="hist-pills" id="histPills"></div>
-
 <div class="bet-row"><div class="bet-col"><input id="bet1" class="input" value="50" type="number"><button id="btn1" class="btn btn-blue" onclick="betAction(1)">BET - KES 50</button></div><div class="bet-col"><input id="bet2" class="input" value="100" type="number"><button id="btn2" class="btn btn-blue" onclick="betAction(2)">BET - KES 100</button></div></div>
-
 <div class="banner"><b>30% Stake Back Every Week</b><span>600 Players Online ✈️</span></div>
 <div class="table-wrap"><table class="table"><thead><tr><th>Player (600)</th><th>Bet</th><th>@</th><th>Win</th></tr></thead><tbody id="betsTable"></tbody></table></div>
-
 <div class="modal-bg" id="loginModal"><div class="modal-box" id="loginBoxContent"></div></div>
 
 <script>
-let logged=false,mult=1,crash=1.5,state='waiting',trail=[],countInt=5,flyProgress=0;
+let logged=false,mult=1,crash=1.5,state='waiting',trail=[],countInt=4;
 let bets={1:{placed:false,amount:0},2:{placed:false,amount:0}};window.REF_CODE="{{ ref_code or '' }}";
 const canvas=document.getElementById('graph'),ctx=canvas.getContext('2d'),multEl=document.getElementById('mult');
-function resize(){canvas.width=canvas.clientWidth*2;canvas.height=360*2;}resize();
+function resize(){canvas.width=canvas.clientWidth*2;canvas.height=380*2;}resize();
 async function api(u,d=null){let o={headers:{'Content-Type':'application/json'}};if(d){o.method='POST';o.body=JSON.stringify(d);}let r=await fetch(u,o);return r.json();}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerBg').style.display='block';}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerBg').style.display='none';}
-function getLoginHTML(){return `<div class="close-x" onclick="closeLogin()">x</div><h2>Login</h2><label>Phone</label><input id="modalPhone" value="+254"><label>Password</label><input id="modalPass" type="password"><button class="btn-login" onclick="doModalAuth()">LOGIN</button><p id="modalErr" style="color:#ff5555"></p>`;}
-function getRegisterHTML(){let p=window.REF_CODE||'';return `<div class="close-x" onclick="closeLogin()">x</div><h2>Sign Up</h2><label>Phone</label><input id="modalPhone" value="+254"><label>Password</label><input id="modalPass" type="password"><label>Referral</label><input id="modalRef" value="${p}"><button class="btn-login" onclick="doModalAuth()">JOIN</button><p id="modalErr" style="color:#ff5555"></p>`;}
+function getLoginHTML(){return `<div class="close-x" onclick="closeLogin()">x</div><h2>Login</h2><input id="modalPhone" value="+254"><input id="modalPass" type="password" placeholder="Password"><button class="btn-login" onclick="doModalAuth()">LOGIN</button><p id="modalErr" style="color:#ff5555"></p>`;}
+function getRegisterHTML(){let p=window.REF_CODE||'';return `<div class="close-x" onclick="closeLogin()">x</div><h2>Sign Up</h2><input id="modalPhone" value="+254"><input id="modalPass" type="password" placeholder="Password"><input id="modalRef" value="${p}" placeholder="Referral"><button class="btn-login" onclick="doModalAuth()">JOIN</button><p id="modalErr" style="color:#ff5555"></p>`;}
 function openLogin(){modalMode='login';document.getElementById('loginBoxContent').innerHTML=getLoginHTML();document.getElementById('loginModal').style.display='flex';}
 function openRegister(){modalMode='register';document.getElementById('loginBoxContent').innerHTML=getRegisterHTML();document.getElementById('loginModal').style.display='flex';}
 function closeLogin(){document.getElementById('loginModal').style.display='none';}
@@ -63,62 +60,67 @@ async function loadRef(){let d=await api('/api/my-referral');if(!d.code)return;d
 function copyRef(){if(window.MY_REF_LINK)navigator.clipboard.writeText(window.MY_REF_LINK);}
 
 function drawGraph(){
-let w=canvas.clientWidth,h=360;
+let w=canvas.clientWidth,h=380;
 ctx.clearRect(0,0,w*2,h*2);
-ctx.fillStyle='#1e1e1e';ctx.fillRect(0,0,w*2,h*2);
-ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1;
-for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,(h*2)*i/5);ctx.lineTo(w*2,(h*2)*i/5);ctx.stroke();}
-if(trail.length<2)return;
-ctx.beginPath();ctx.moveTo(0,(h*2)-20);
+ctx.fillStyle='#121212';ctx.fillRect(0,0,w*2,h*2);
+// grid lines
+ctx.strokeStyle='#222';ctx.lineWidth=1;
+for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(0,(h*2)*i/6);ctx.lineTo(w*2,(h*2)*i/6);ctx.stroke();}
+if(trail.length<2){return;}
+ctx.beginPath();ctx.moveTo(0,(h*2)-30);
 for(let i=0;i<trail.length;i++){ctx.lineTo(trail[i].x*2,trail[i].y*2);}
-ctx.strokeStyle='#ff8f00';ctx.lineWidth=6;ctx.stroke();
-ctx.lineTo(trail[trail.length-1].x*2,(h*2)-20);ctx.closePath();ctx.fillStyle='rgba(255,143,0,0.15)';ctx.fill();
+ctx.strokeStyle='#ff8f00';ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+ctx.lineTo(trail[trail.length-1].x*2,(h*2)-30);ctx.closePath();ctx.fillStyle='rgba(255,143,0,0.18)';ctx.fill();
 let last=trail[trail.length-1];
-ctx.font='40px Arial';ctx.fillText('✈️',(last.x*2)-20,(last.y*2)-20);
+ctx.font='50px Arial';ctx.fillText('✈️',(last.x*2)-25,(last.y*2)-25);
 }
 
 let livePlayers=[];
-function genLivePlayers(){livePlayers=[];let first=["Brian","Kevin","Faith","Sharon","Moses","Wanjiku","Otieno","Kamau","Njeri","Grace","Mutiso","John","Akinyi","Chebet","Njoroge","Omondi","Atieno","Kiprono","Chepkoech","Mwangi","Onyango","Wafula","Nekesa","Baraka","Juma","Achieng","Okello","Muthoni"];for(let i=0;i<600;i++){livePlayers.push({name:first[Math.floor(Math.random()*first.length)]+Math.floor(Math.random()*9999),bet:[10,20,50,100,200,350,500,1000,1500][Math.floor(Math.random()*9)],cash:Math.random()<0.6?Math.random()*2.5+1.1:Math.random()*20+2.5,status:'betting'});}}
+function genLivePlayers(){livePlayers=[];let first=["Brian","Kevin","Faith","Sharon","Moses","Wanjiku","Otieno","Kamau","Njeri","Grace","Mutiso","John","Akinyi","Chebet","Njoroge","Omondi","Atieno","Kiprono","Chepkoech","Mwangi","Onyango","Wafula"];for(let i=0;i<600;i++){livePlayers.push({name:first[Math.floor(Math.random()*first.length)]+Math.floor(Math.random()*9999),bet:[10,20,50,100,200,350,500,1000,1500][Math.floor(Math.random()*9)],cash:Math.random()<0.6?Math.random()*2.5+1.1:Math.random()*20+2.5,status:'betting'});}}
 function renderLive(){let tb=document.getElementById('betsTable');tb.innerHTML='';for(let i=0;i<600;i++){let p=livePlayers[i];let c=p.status==='cashed'?'#00ff88':p.status==='busted'?'#ff4444':'#ffca28';let at=p.status==='betting'?'-':p.cash.toFixed(2)+'x';let win=p.status==='cashed'?`KES ${(p.bet*p.cash).toFixed(0)}`:'-';tb.innerHTML+=`<tr><td>👤 ${p.name}</td><td>${p.bet}</td><td style="color:${c};font-weight:800">${at}</td><td style="color:#00ff88">${win}</td></tr>`;}}
 
 function startWaiting(){
-state='waiting';countInt=5;flyProgress=0;trail=[];mult=1;
-multEl.innerHTML=`${countInt}<small>Next round in ${countInt}s - Place your bet!</small>`;multEl.style.color='#fff';
+state='waiting';countInt=4;trail=[];mult=1;
+multEl.style.fontSize='80px';multEl.style.color='#fff';
+multEl.innerHTML=`${countInt}<small>Next round in ${countInt}s - Place your bet!</small>`;
 drawGraph();
 let iv=setInterval(()=>{
 if(state!=='waiting'){clearInterval(iv);return;}
+if(countInt<=1){
+multEl.innerHTML=`1<small>Starting...</small>`;
+clearInterval(iv);
+setTimeout(()=>{startFlying();},800);
+}else{
+countInt--;
 multEl.innerHTML=`${countInt}<small>Next round in ${countInt}s - Place your bet!</small>`;
-if(countInt<=0){clearInterval(iv);startFlying();}
-else{countInt--;}
+}
 },1000);
 }
 
-// SLOW SPEED FIX - Pakakumi speed
 async function startFlying(){
-let c=await api('/api/crash');crash=c.crash;state='flying';flyProgress=0;trail=[];genLivePlayers();renderLive();
+let c=await api('/api/crash');crash=c.crash;state='flying';trail=[];genLivePlayers();renderLive();
 let start=Date.now();
 let flyIv=setInterval(()=>{
 if(state!=='flying'){clearInterval(flyIv);return;}
 let elapsed=(Date.now()-start)/1000;
-// SLOW: 2x in ~12 sec, not 5 sec
-mult = Math.exp(0.08 * elapsed);
+mult = Math.exp(0.07 * elapsed); // SLOWER - 0.07 not 0.08 = even slower
 if(mult<1)mult=1;
-flyProgress=Math.min(elapsed*8, 100); // SLOW PLANE - was 25, now 8
-let w=canvas.clientWidth,h=360;
-let x = (flyProgress/100)*w*0.85;
-let y = h-10 - Math.pow(flyProgress/100,1.6)*(h*0.75);
-trail.push({x:x,y:y});if(trail.length>150)trail.shift();
-multEl.innerHTML=`${mult.toFixed(2)}x`;multEl.style.color='#ffca28';
+let progress=Math.min(elapsed*7, 100); // 7 = very slow plane
+let w=canvas.clientWidth,h=380;
+let x = (progress/100)*w*0.85;
+let y = h-10 - Math.pow(progress/100,1.7)*(h*0.78);
+trail.push({x:x,y:y});if(trail.length>180)trail.shift();
+multEl.innerHTML=`${mult.toFixed(2)}x`;multEl.style.color='#ffca28';multEl.style.fontSize='70px';
 drawGraph();
 [1,2].forEach(n=>{if(bets[n].placed){let btn=document.getElementById('btn'+n);btn.className='btn btn-yellow';btn.innerText=`CASHOUT KES ${(bets[n].amount*mult).toFixed(0)} @ ${mult.toFixed(2)}x`;}});
 livePlayers.forEach(p=>{if(p.status==='betting'&&mult>=p.cash){p.status='cashed';}});
 if(mult>=crash){
 clearInterval(flyIv);
 state='busted';
-multEl.innerHTML=`BUSTED @ ${crash.toFixed(2)}x<small>Round ended</small>`;multEl.style.color='#ff4444';
+multEl.innerHTML=`BUSTED @ ${crash.toFixed(2)}x<small>Round ended</small>`;multEl.style.color='#ff4444';multEl.style.fontSize='32px';
 [1,2].forEach(n=>{if(bets[n].placed){let btn=document.getElementById('btn'+n);btn.className='btn btn-blue';btn.innerText=`BUSTED @ ${crash.toFixed(2)}x`;bets[n].placed=false;}});
 livePlayers.forEach(p=>{if(p.status==='betting')p.status='busted';});renderLive();loadHist();
-setTimeout(()=>{startWaiting();[1,2].forEach(n=>{let v=document.getElementById('bet'+n).value;let btn=document.getElementById('btn'+n);if(!bets[n].placed){btn.className='btn btn-blue';btn.innerText=`BET - KES ${v}`;}});},3500);
+setTimeout(()=>{startWaiting();[1,2].forEach(n=>{let v=document.getElementById('bet'+n).value;let btn=document.getElementById('btn'+n);if(!bets[n].placed){btn.className='btn btn-blue';btn.innerText=`BET - KES ${v}`;}});},3000);
 }
 },100);
 }
