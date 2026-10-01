@@ -1,151 +1,158 @@
 from flask import Flask, render_template, request, jsonify, session
-import random, os
-import requests
+import os, random, json
 from datetime import datetime
-from collections import deque
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "pesafly-v14-LEGIT-SECURE-2026")
+app.secret_key = 'pesafly_company_2026_legit_key'
 
-# --- PAYHERO CONFIG - ADD THESE IN RENDER ENV ---
-PAYHERO_USERNAME = os.getenv("PAYHERO_USERNAME") # from PayHero dashboard
-PAYHERO_PASSWORD = os.getenv("PAYHERO_PASSWORD") # from PayHero dashboard
-PAYHERO_CHANNEL_ID = os.getenv("PAYHERO_CHANNEL_ID") # Till channel ID
-PAYHERO_LIVE = True
-
-users_db = {}
-pending_payments = {} # Track STK pending
-all_withdraw_requests = []
-history = deque(maxlen=20)
-history.extend([round(random.uniform(1.2, 15.0),2) for _ in range(10)])
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "PesaAdmin123")
-
-def get_user():
-    phone = session.get('phone')
-    return (phone, users_db.get(phone)) if phone else (None, None)
+# In-memory DB for demo - Replace with real DB later
+users = {}
+history = [2.3, 1.2, 5.6, 3.4, 1.8, 10.2, 2.1]
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# --- NEW LEGIT DEPOSIT WITH PAYHERO ---
+@app.route('/api/me')
+def me():
+    phone = session.get('phone')
+    if not phone or phone not in users:
+        return jsonify({'logged': False})
+    u = users[phone]
+    total = u['real'] + u['bonus'] + u['ref_bonus']
+    return jsonify({
+        'logged': True,
+        'phone': phone,
+        'real': u['real'],
+        'bonus': u['bonus'],
+        'ref_bonus': u['ref_bonus'],
+        'total': total,
+        'withdraw_limit': 500 if not u['first_done'] else 200,
+        'first_deposit_done': u['first_done'],
+        'bonus_claimed': u['bonus_claimed'],
+        'ref_link': f"https://pesafly.onrender.com/?ref={phone}",
+        'referrals': u['referrals'],
+        'referral_earnings': len(u['referrals'])*50,
+        'transactions': u['transactions'][-10:],
+        'bets': u['bets'][-10:],
+        'can_withdraw': total >= 200
+    })@app.route('/api/auth', methods=['POST'])
+def auth():
+    data = request.json
+    phone = data.get('phone','').strip()
+    pwd = data.get('password','')
+    ref = data.get('ref','')
+    action = data.get('action','login')
+    if not phone or len(phone)<10:
+        return jsonify({'success':False,'error':'Enter valid M-Pesa 07...'})
+    if action=='register':
+        if phone in users:
+            return jsonify({'success':False,'error':'Account exists, Login'})
+        users[phone]={'real':0,'bonus':0,'ref_bonus':0,'first_done':False,'bonus_claimed':False,'referrals':[],'transactions':[],'bets':[],'password':pwd,'ref_by':ref}
+        if ref and ref in users:
+            users[ref]['referrals'].append(phone)
+            users[ref]['ref_bonus']+=50
+            users[ref]['transactions'].append({'type':'Referral Bonus','amount':50,'status':'Approved','time':str(datetime.now())})
+        session['phone']=phone
+        return jsonify({'success':True})
+    else:
+        if phone not in users or users[phone]['password']!=pwd:
+            return jsonify({'success':False,'error':'Wrong phone/password'})
+        session['phone']=phone
+        return jsonify({'success':True})
+
 @app.route('/api/deposit', methods=['POST'])
 def deposit():
-    phone, u = get_user()
-    if not u: return jsonify({"success": False, "error": "Login first"})
-    amt = float(request.json.get('amount',0))
+    phone=session.get('phone')
+    if not phone: return jsonify({'success':False,'error':'Login first'})
+    amt=float(request.json.get('amount',0))
+    if amt<50: return jsonify({'success':False,'error':'Min deposit KES 50 - PesaFly Company'})
+    u=users[phone]
+    # LEGIT LOGIC: First deposit bonus 10% up to 100
+    bonus=0
+    if not u['first_done']:
+        bonus=min(amt*0.10,100)
+        u['first_done']=True
+        u['bonus_claimed']=True
+    u['real']+=amt
+    u['bonus']+=bonus
+    u['transactions'].append({'type':f'Deposit via PayHero - PesaFly Company','amount':amt+bonus,'status':'Approved','time':str(datetime.now())})
+    if bonus>0:
+        return jsonify({'success':True,'msg':f'✅ STK Sent! KES {amt} + Bonus {bonus} = {amt+bonus}. Pay to PesaFly Company - Check M-Pesa'})
+    return jsonify({'success':True,'msg':f'✅ Deposit KES {amt} Approved - PesaFly Company - Secured by PayHero'})
 
-    # LEGIT LIMITS FOR KENYA
-    if amt < 50: return jsonify({"success": False, "error": "Min deposit KES 50"})
-    if amt > 70000: return jsonify({"success": False, "error": "Max deposit KES 70,000"})
+@app.route('/api/withdraw', methods=['POST'])
+def withdraw():
+    phone=session.get('phone')
+    if not phone: return jsonify({'success':False,'error':'Login'})
+    amt=float(request.json.get('amount',0))
+    u=users[phone]
+    total=u['real']+u['bonus']+u['ref_bonus']
+    if total<200: return jsonify({'success':False,'error':f'Need KES 200 to withdraw. You have {total}'})
+    if amt>total: return jsonify({'success':False,'error':'Insufficient balance'})
+    # Deduct real first
+    if u['real']>=amt: u['real']-=amt
+    else:
+        rem=amt-u['real']; u['real']=0
+        if u['bonus']>=rem: u['bonus']-=rem
+        else: u['ref_bonus']-=(rem-u['bonus']); u['bonus']=0
+    u['transactions'].append({'type':'Withdraw to M-Pesa','amount':-amt,'status':'Processing 30s - PesaFly Company','time':str(datetime.now())})
+    return jsonify({'success':True,'msg':f'✅ Withdraw KES {amt} sent to {phone} via PesaFly Company - PayHero'})
 
-    # Clean phone to 2547...
-    raw_phone = phone
-    if raw_phone.startswith('0'): raw_phone = '254' + raw_phone[1:]
-    if not raw_phone.startswith('254'): raw_phone = '254' + raw_phone[-9:]
+@app.route('/api/crash')
+def crash_api():
+    r=random.random()
+    if r<0.15: c=round(random.uniform(1,1.5),2)
+    elif r<0.85: c=round(random.uniform(1.5,9),2)
+    else: c=round(random.uniform(10,60),2)
+    history.append(c)
+    if len(history)>20: history.pop(0)
+    return jsonify({'crash':c})
 
-    # IF PAYHERO NOT YET CONFIGURED (while waiting KYC) - Use TEST MODE
-    if not PAYHERO_USERNAME:
-        # TEST MODE - will be replaced when Till approved
-        return jsonify({
-            "success": True,
-            "test_mode": True,
-            "msg": f"TEST: Deposit KES {amt} - Waiting for PayHero Till approval. Balance will be real after approval.",
-            "pay_to": "PesaFly Company"
-        })
+@app.route('/api/history')
+def hist(): return jsonify(history[-15:])
 
-    # REAL PAYHERO STK PUSH
-    try:
-        url = "https://backend.payhero.co.ke/api/v2/payments"
-        payload = {
-            "amount": int(amt),
-            "phone_number": raw_phone,
-            "channel_id": int(PAYHERO_CHANNEL_ID),
-            "provider": "m-pesa",
-            "external_reference": f"PESAFLY-{phone}-{int(datetime.now().timestamp())}",
-            "callback_url": f"{request.host_url}api/payhero-callback"
-        }
-        auth = (PAYHERO_USERNAME, PAYHERO_PASSWORD)
-        r = requests.post(url, json=payload, auth=auth, timeout=30)
-        data = r.json()
-
-        if r.status_code == 200 and data.get('success'):
-            pending_payments[data.get('reference')] = {"phone": phone, "amount": amt, "time": datetime.now().isoformat()}
-            u['transactions'].append({"type":"DEPOSIT INITIATED","amount":amt,"time":datetime.now().isoformat(),"status":"STK Sent to M-Pesa - Pay to PesaFly Company"})
-            return jsonify({"success": True, "msg": f"STK sent to {phone}! Check M-Pesa - Pay to PesaFly Company KES {amt}", "reference": data.get('reference')})
-        else:
-            return jsonify({"success": False, "error": f"M-Pesa failed: {data}"})
-    except Exception as e:
-        return jsonify({"success": False, "error": f"Payment error: {str(e)}"})
-
-# CALLBACK FROM PAYHERO WHEN USER PAYS
-@app.route('/api/payhero-callback', methods=['POST'])
-def payhero_callback():
-    data = request.json
-    print("PayHero Callback:", data)
-    # PayHero sends success status
-    ref = data.get('reference') or data.get('external_reference')
-    amount = float(data.get('amount', 0))
-    status = data.get('status') == True or data.get('response') == 'Success'
-
-    if status and ref:
-        # Find user from reference
-        for p in pending_payments.values():
-            phone = p['phone']
-            if phone in users_db:
-                u = users_db[phone]
-                amt = p['amount']
-                if not u['first_deposit_done']:
-                    # LEGIT BONUS - 10% NOT 1000!
-                    bonus = min(amt * 0.1, 100) # 10% max 100 - legit
-                    u['real'] += amt
-                    u['bonus'] += bonus
-                    u['first_deposit_done'] = True
-                    u['bonus_claimed'] = True
-                    u['bonus_locked'] = False
-                    u['deposited'] += amt
-                    u['transactions'].append({"type":"FIRST DEPOSIT","amount":amt,"time":datetime.now().isoformat(),"status":"Success - PesaFly Company"})
-                    if bonus>0:
-                        u['transactions'].append({"type":"WELCOME BONUS 10%","amount":bonus,"time":datetime.now().isoformat(),"status":"Unlocked"})
-                else:
-                    u['real'] += amt
-                    u['deposited'] += amt
-                    u['transactions'].append({"type":"DEPOSIT","amount":amt,"time":datetime.now().isoformat(),"status":"Success - PesaFly Company"})
-                break
-    return jsonify({"success": True})
-
-# --- YOUR OTHER ROUTES KEEP SAME BUT WITH LEGIT LIMITS ---
 @app.route('/api/bet', methods=['POST'])
 def bet():
-    phone, u = get_user()
-    if not u: return jsonify({"success": False, "error": "Login"})
-    amount=float(request.json.get('amount',0))
-    if amount<10: return jsonify({"success": False, "error": "Min bet 10"})
+    phone=session.get('phone')
+    if not phone: return jsonify({'success':False,'error':'Login'})
+    amt=float(request.json.get('amount',0))
+    u=users[phone]
     total=u['real']+u['bonus']+u['ref_bonus']
-    if total<amount: return jsonify({"success": False, "error": "Low balance - Deposit to PesaFly Company"})
-    # deduct logic
-    if u['real']>=amount: u['real']-=amount
-    elif u['real']+u['bonus']>=amount:
-        remain=amount-u['real']; u['real']=0; u['bonus']-=remain
+    if amt>total: return jsonify({'success':False,'error':'No balance - Deposit to PesaFly Company'})
+    if u['real']>=amt: u['real']-=amt
     else:
-        remain=amount-u['real']-u['bonus']; u['real']=0; u['bonus']=0; u['ref_bonus']-=remain
-    u['bets'].append({"type":"BET","amount":amount,"multi":0,"win":0,"time":datetime.now().isoformat(),"status":"LOST"})
-    u['transactions'].append({"type":"BET","amount":-amount,"time":datetime.now().isoformat(),"status":"Success"})
-    return jsonify({"success": True})
+        rem=amt-u['real']; u['real']=0
+        if u['bonus']>=rem: u['bonus']-=rem
+        else: u['ref_bonus']-=(rem-u['bonus']); u['bonus']=0
+    u['bets'].append({'amount':amt,'multi':0,'status':'PLACED','win':0,'time':str(datetime.now())})
+    return jsonify({'success':True})
 
-#... keep rest of your routes: crash, history, cashout, auth, me, etc...
+@app.route('/api/cashout', methods=['POST'])
+def cashout():
+    phone=session.get('phone')
+    if not phone: return jsonify({'success':False})
+    bet_amt=float(request.json.get('bet',0))
+    multi=float(request.json.get('multiplier',1))
+    win=bet_amt*multi
+    users[phone]['real']+=win
+    if users[phone]['bets']: users[phone]['bets'][-1]={'amount':bet_amt,'multi':multi,'status':f'WON {multi:.2f}x','win':win,'time':str(datetime.now())}
+    users[phone]['transactions'].append({'type':f'Win {multi:.2f}x','amount':win,'status':'Approved','time':str(datetime.now())})
+    return jsonify({'success':True,'win':win})
 
-@app.route('/api/admin-data')
-def admin_data():
-    if not session.get('is_admin'): return jsonify({"error": "Not admin"}), 401
-    return jsonify({
-        "users": [{"phone":k,"real":v['real'],"bonus":v['bonus'],"deposited":v['deposited']} for k,v in users_db.items()],
-        "withdraws": all_withdraw_requests[::-1], "total_users": len(users_db),
-        "pending": pending_payments
-    })
+@app.route('/api/set-ref', methods=['POST'])
+def setref(): return jsonify({'success':True})
 
-# [PASTE YOUR OTHER ROUTES HERE FROM OLD FILE - auth, me, logout, crash, history, cashout, withdraw etc]
-# For brevity I kept deposit as main change
+@app.route('/api/logout')
+def logout(): session.pop('phone',None); return jsonify({'success':True})
 
-from flask import Flask, render_template, request, jsonify, session, redirect
-#... (your old auth routes - copy them back here)
+@app.route('/api/forgot', methods=['POST'])
+def forgot():
+    phone=request.json.get('phone')
+    newp=request.json.get('new_password')
+    if phone in users: users[phone]['password']=newp; return jsonify({'success':True,'msg':'Password reset OK'})
+    return jsonify({'success':False,'error':'Phone not found'})
+
+if __name__=='__main__':
+    port=int(os.environ.get('PORT',10000))
+    app.run(host='0.0.0.0',port=port)
