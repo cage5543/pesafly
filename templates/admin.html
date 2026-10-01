@@ -1,48 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>PesaFly Admin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial;background:#111;color:#fff;padding:20px}
-input{padding:12px;width:250px;margin:10px;border-radius:8px;border:none}
-button{padding:12px 20px;background:#00ff88;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
-.card{background:#222;padding:15px;border-radius:12px;margin:10px 0}
-</style>
-</head>
-<body>
-<div id="loginBox">
-<h2>🔒 PesaFly Admin</h2>
-<input id="pwd" type="password" placeholder="Admin Password">
-<button onclick="login()">LOGIN</button>
-<p id="msg"></p>
-</div>
-
-<div id="adminBox" style="display:none">
-<h2>✅ PesaFly Dashboard - LIVE</h2>
-<button onclick="load()">Refresh Data</button>
-<div id="data"></div>
-<h3>Withdraw Requests</h3>
-<div id="withdraws"></div>
-</div>
-
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin PesaFly</title>
+<style>body{margin:0;background:#0a0e14;color:#fff;font-family:Arial;padding:12px}.card{background:#141b25;padding:14px;border-radius:10px;margin-bottom:10px;border:1px solid #1f2a38}input,button{padding:10px;border-radius:6px;border:none;margin:3px}input{background:#0f151e;color:#fff;border:1px solid #2a3a4f}button{background:#2979ff;color:#fff;font-weight:800}table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:7px;border-bottom:1px solid #1f2a38}</style></head><body>
+<h2>✈️ PesaFly V16 - ADMIN HOUSE PROFIT</h2>
+<div id="login" class="card"><input id="apass" type="password" placeholder="PesaAdmin123"><button onclick="adminLogin()">LOGIN</button><p id="aerr" style="color:#ff4444"></p></div>
+<div id="panel" style="display:none"><div class="card" style="display:flex;gap:10px;flex-wrap:wrap"><div>Users: <b id="sUsers">0</b></div><div style="color:#00ff88">House Profit: <b id="sProfit">0</b></div><div>Deposits: <span id="sDep">0</span></div><div>Withdraws: <span id="sWith">0</span></div><div>Fees (10%): <span id="sFees">0</span></div><div>Bets: <span id="sBets">0</span> / Won: <span id="sWon">0</span></div><button onclick="loadStats()">Refresh</button></div>
+<div class="card"><table><thead><tr><th>Phone</th><th>Real</th><th>Bonus</th><th>Total</th><th>Dep</th><th>Code</th><th>Refs</th><th>Ref Earn</th><th>Claimed?</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
 <script>
-async function login(){
- let p=document.getElementById('pwd').value;
- let r=await fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})});
- let j=await r.json();
- if(j.success){document.getElementById('loginBox').style.display='none';document.getElementById('adminBox').style.display='block';load();}
- else{ document.getElementById('msg').innerText=j.error; }
-}
-async function load(){
- let r=await fetch('/api/admin-data'); let j=await r.json();
- if(j.error){ document.getElementById('msg').innerText='Login first'; return; }
- document.getElementById('data').innerHTML=`<div class=card>Total Users: ${j.total_users}</div>`+j.users.map(u=>`<div class=card>${u.phone} - Real:${u.real} Bonus:${u.bonus} Ref:${u.ref_bonus} Deposited:${u.deposited} Referrals:${u.referrals}</div>`).join('');
- document.getElementById('withdraws').innerHTML=j.withdraws.map(w=>`<div class=card>${w.phone} - KES ${w.amount} - ${w.status} <button onclick="approve(${w.id})">APPROVE</button></div>`).join('');
-}
-async function approve(id){
- await fetch('/api/admin-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); load();
-}
-</script>
-</body>
-</html>
+async function api(u,d=null){let o={headers:{'Content-Type':'application/json'}};if(d){o.method='POST';o.body=JSON.stringify(d);}let r=await fetch(u,o);return r.json();}
+async function adminLogin(){let p=document.getElementById('apass').value;let d=await api('/api/admin/login',{password:p});if(!d.success){document.getElementById('aerr').innerText='Wrong';return;}document.getElementById('login').style.display='none';document.getElementById('panel').style.display='block';loadStats();loadUsers();}
+async function loadStats(){let d=await api('/api/admin/stats');if(!d.users&&d.users!==0)return;document.getElementById('sUsers').innerText=d.users;document.getElementById('sProfit').innerText='KES '+d.house_profit.toFixed(2);document.getElementById('sDep').innerText='KES '+d.total_dep.toFixed(2);document.getElementById('sWith').innerText='KES '+d.total_with.toFixed(2);document.getElementById('sFees').innerText='KES '+d.total_fees.toFixed(2);document.getElementById('sBets').innerText=d.total_bets.toFixed(0);document.getElementById('sWon').innerText=d.total_won.toFixed(0);}
+async function loadUsers(){let users=await api('/api/admin/users');let tb=document.getElementById('userTable');tb.innerHTML='';users.forEach(u=>{tb.innerHTML+=`<tr><td>${u.email}</td><td>${u.real.toFixed(0)}</td><td>${u.bonus.toFixed(0)}</td><td><b>${u.total.toFixed(0)}</b></td><td>${u.deposited.toFixed(0)}</td><td style="color:#ff8f00">${u.code}</td><td>${u.refs}</td><td style="color:#00ff88">${u.ref_earn}</td><td>${u.claimed?'✅':''}</td></tr>`;});}
+</script></body></html>
