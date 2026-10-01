@@ -1,194 +1,34 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PesaFly - Aviator Kenya</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0f0f0f;color:#fff}
-.top{display:flex;justify-content:space-between;align-items:center;background:#1a1a1a;padding:10px 12px;position:sticky;top:0;z-index:20;border-bottom:1px solid #333}
-.logo{font-weight:900;color:#ff8f00}.logo span{background:#ff8f00;color:#000;padding:2px 6px;border-radius:4px}
-.menu-btn{font-size:22px;background:none;border:none;color:#fff;cursor:pointer}
-.btn-dep{background:#ff8f00;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:900}
-.top-r{display:flex;gap:10px;align-items:center;font-size:12px}.bal{color:#00ff88;font-weight:900}
-.graph-box{background:#121212;margin:8px;border-radius:8px;position:relative;height:380px;overflow:hidden;border:1px solid #333}
-#mult{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#ffca28;z-index:5;text-align:center;width:100%;text-shadow:0 0 10px rgba(255,202,40,0.5)}
-#mult small{display:block;font-size:15px;color:#fff;margin-top:8px;font-weight:400;opacity:0.9}
-.hist-pills{display:flex;gap:6px;padding:6px 8px;overflow-x:auto;background:#1a1a1a}.pill{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
-.banner{background:#1a1a1a;border:1px solid #ff8f00;margin:8px;border-radius:6px;padding:10px;display:flex;justify-content:space-between;font-size:12px}.banner b{color:#ff8f00}
-.table-wrap{max-height:380px;overflow-y:auto;background:#1a1a1a;margin:8px;border-radius:8px}
-.table{width:100%;border-collapse:collapse;font-size:11px}.table th{position:sticky;top:0;background:#222;padding:6px;color:#aaa;text-align:left}.table td{padding:5px 6px;border-bottom:1px solid #2a2a2a}
-.bet-row{display:flex;gap:8px;margin:8px}.bet-col{flex:1;background:#1e1e1e;padding:8px;border-radius:10px;border:1px solid #333}
-.input{width:100%;padding:8px;background:#111;border:1px solid #444;color:#fff;border-radius:6px;margin:4px 0;text-align:center}
-.btn{width:100%;padding:13px;border:none;border-radius:8px;font-weight:900;margin-top:6px;cursor:pointer;font-size:13px}
-.btn-blue{background:#2979ff;color:#fff}.btn-red{background:#d32f2f;color:#fff}.btn-yellow{background:#ffca28;color:#000}
-.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;z-index:100}
-.drawer{position:fixed;top:0;left:-320px;width:300px;height:100%;background:#1a1a1a;z-index:101;transition:left 0.3s ease;overflow-y:auto;padding:12px;border-right:2px solid #ff8f00}.drawer.open{left:0}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:999}
-.modal-box{background:#1e1e1e;width:92%;max-width:380px;border-radius:12px;padding:0;position:relative;overflow:hidden;border:1px solid #333}
-.close-x{position:absolute;right:14px;top:10px;font-size:18px;cursor:pointer;color:#fff;z-index:2}
-/* PAKAKUMI STYLE */
-.pk-tabs{display:flex;background:#111}.pk-tab{flex:1;padding:14px;text-align:center;font-weight:900;cursor:pointer;font-size:14px;color:#aaa;border-bottom:3px solid transparent}.pk-tab.active{color:#ff8f00;border-bottom:3px solid #ff8f00;background:#1a1a1a}
-.pk-body{padding:20px}
-.pk-input-row{display:flex;gap:0;margin-bottom:12px;border:1px solid #444;border-radius:8px;overflow:hidden;background:#111}
-.pk-prefix{background:#2a2a2a;padding:12px 10px;color:#fff;font-weight:800;font-size:14px;border-right:1px solid #444}
-.pk-input{flex:1;background:#111;border:none;color:#fff;padding:12px;font-size:14px;outline:none}
-.pk-btn{width:100%;padding:14px;background:#ff8f00;border:none;border-radius:8px;color:#000;font-weight:900;font-size:15px;margin-top:8px;cursor:pointer}
-.pk-link{color:#ff8f00;font-size:12px;text-align:center;display:block;margin-top:12px;cursor:pointer}
-</style></head><body>
-<div class="top"><button class="menu-btn" onclick="openDrawer()">☰</button><div class="logo"><span>PF</span> PesaFly</div><button class="btn-dep" onclick="openDrawer()">DEPOSIT</button><div class="top-r" id="topRight"><span onclick="openLogin()">LOGIN</span><span style="color:#ff8f00" onclick="openRegister()">REGISTER</span><span class="bal" id="balTop">KES 0</span></div></div>
-<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer"><div style="display:flex;justify-content:space-between"><b style="color:#ff8f00">☰ MENU</b><span onclick="closeDrawer()" style="cursor:pointer">x</span></div>
-<div style="margin-top:12px">
-<h4 style="color:#ff8f00">BAL: <b class="bal" id="bal">KES 0</b></h4><div style="font-size:11px">Real:<span id="realBal">0</span> Bonus:<span id="bonusBal">0</span></div>
-<div id="bonusBar" style="background:#ff8f00;color:#000;padding:8px;border-radius:6px;font-weight:800;font-size:12px;text-align:center;margin-top:8px">Deposit 350 to unlock 1000</div>
-<input id="depAmt" class="input" value="350"><input id="phone" class="input" placeholder="07xxxxxxxx"><button class="btn btn-blue" onclick="deposit()">DEPOSIT</button>
-<button class="btn" style="background:#00ff88;color:#000;display:none" id="claimBtn" onclick="claim()">CLAIM 1000</button>
-<div style="background:#222;padding:8px;border-radius:6px;margin:10px 0"><small id="refLink" style="word-break:break-all">Login to see link</small><br><button onclick="copyRef()" style="background:#ff8f00;color:#000;border:none;padding:5px 8px;border-radius:4px;font-weight:800;margin-top:5px;font-size:11px">COPY LINK</button><div style="font-size:11px">Refs:<span id="refCount">0</span> Earn:<span id="refEarn">0</span></div></div>
-<input id="withAmt" class="input" value="500"><button class="btn btn-blue" onclick="withdraw()">WITHDRAW</button>
-<p id="msg" style="font-size:11px;color:#aaa;margin-top:8px"></p>
-<button id="logoutBtn" style="display:none;width:100%;padding:12px;background:#d32f2f;color:#fff;border:none;border-radius:8px;font-weight:900;margin-top:20px;cursor:pointer" onclick="doLogout()">LOGOUT</button>
-</div></div>
-
-<div class="graph-box"><canvas id="graph" style="width:100%;height:100%"></canvas><div id="mult">4<small>Next round in 4s - Place your bet!</small></div></div>
-<div class="hist-pills" id="histPills"></div>
-<div class="bet-row"><div class="bet-col"><input id="bet1" class="input" value="50" type="number"><button id="btn1" class="btn btn-blue" onclick="betAction(1)">BET - KES 50</button></div><div class="bet-col"><input id="bet2" class="input" value="100" type="number"><button id="btn2" class="btn btn-blue" onclick="betAction(2)">BET - KES 100</button></div></div>
-<div class="banner"><b>30% Stake Back Every Week</b><span>600 Players Online ✈️</span></div>
-<div class="table-wrap"><table class="table"><thead><tr><th>Player (600)</th><th>Bet</th><th>@</th><th>Win</th></tr></thead><tbody id="betsTable"></tbody></table></div>
-
-<div class="modal-bg" id="loginModal"><div class="modal-box" id="loginBoxContent"></div></div>
-
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PesaFly V21</title><style>*{box-sizing:border-box}body{margin:0;background:#060a12;color:#fff;font-family:sans-serif}.menu{width:340px;background:#111827;position:fixed;left:0;top:0;bottom:0;padding:15px;overflow:auto;border-right:2px solid #f59e0b;z-index:10}.main{margin-left:340px;padding:10px}.btn{width:100%;padding:13px;border:none;border-radius:10px;font-weight:800;cursor:pointer;margin:6px 0}.blue{background:#3b82f6;color:#fff}.orange{background:#f59e0b;color:#000}.red{background:#ef4444;color:#fff}.green{background:#22c55e}.dark{background:#1f2937;color:#fff;border:1px solid #334155}input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;margin:6px 0}.tab{display:flex;gap:6px}.tab button{flex:1;padding:10px;border-radius:10px;border:1px solid #f59e0b;background:#000;color:#fff;cursor:pointer;font-weight:700}.tab button.active{background:#f59e0b;color:#000}.box{background:#1f2937;padding:10px;border-radius:10px;margin:8px 0;border:1px dashed #f59e0b;font-size:13px}.small{font-size:12px;opacity:.85;word-break:break-all}.bal{color:#22c55e;font-size:20px;font-weight:900}canvas{width:100%;background:#0b1220;border-radius:14px;border:1px solid #1e293b}.history{display:flex;gap:6px;overflow:auto}.hchip{padding:6px 10px;border-radius:20px;background:#1f2937;font-size:12px;font-weight:700;min-width:50px;text-align:center}@media(max-width:800px){.menu{position:relative;width:100%}.main{margin-left:0}}</style></head><body>
+<div class="menu" id="menu">
+<h2 style="color:#f59e0b">≡ MENU</h2>
+<div id="authBox"><h3>Login / Register</h3><input id="authPhone" placeholder="Phone 07xxxxxxxx"><input id="authPass" type="password" placeholder="Password min 4"><input id="refInput" placeholder="Referral optional"><div style="display:flex;gap:6px"><button class="btn blue" onclick="doAuth('login')">LOGIN</button><button class="btn orange" onclick="doAuth('register')">REGISTER</button></div><div id="authMsg" class="small"></div></div>
+<div id="userBox" style="display:none"><div class="bal">BAL: KES <span id="bal">0</span></div><div class="small">Real:<span id="real">0</span> Bonus:<span id="bonus">0</span> Dep:<span id="dep">0</span></div><div class="box" id="bonusBox" style="background:#f59e0b;color:#000;text-align:center;font-weight:900">Deposit 350 to unlock 1000 BONUS</div><button class="btn green" id="claimBtn" style="display:none" onclick="claimBonus()">CLAIM 1000 BONUS</button>
+<div class="tab"><button id="tabSTK" class="active" onclick="switchTab('stk')">STK PUSH</button><button id="tabMAN" onclick="switchTab('manual')">MANUAL</button></div>
+<div id="stkBox"><input id="depAmt" value="350" type="number"><input id="depPhone" placeholder="07xxxxxxxx"><button class="btn blue" onclick="doSTK()">DEPOSIT - STK PUSH</button><div id="stkMsg" class="small"></div></div>
+<div id="manBox" style="display:none"><div class="box">Lipa Buy Goods Till: <b style="font-size:22px;color:#f59e0b">1242837</b><br>Then enter CODE below</div><input id="manAmt" value="350" type="number"><input id="manCode" placeholder="M-Pesa Code e.g QGH7ABC123" style="text-transform:uppercase"><button class="btn orange" onclick="doManual()">VERIFY & CREDIT INSTANT</button><div id="manMsg" class="small"></div></div>
+<div class="box small">Ref: <b id="refLink"></b><br><button class="btn dark" onclick="copyRef()">COPY LINK</button> Refs:<span id="refCount">0</span> Earn:<span id="refEarn">0</span></div>
+<input id="betAmt" value="50" type="number"><div style="display:flex;gap:6px"><button class="btn blue" id="betBtn" onclick="placeBet()">PLACE BET - KES 50</button><button class="btn green" id="cashBtn" style="display:none" onclick="doCashout()">CASHOUT</button></div><input id="withAmt" value="500" type="number"><button class="btn dark" onclick="doWithdraw()">WITHDRAW</button><div id="msg" class="small"></div><button class="btn red" onclick="doLogout()">LOGOUT</button></div></div>
+<div class="main"><div class="history" id="hist"></div><canvas id="game" height="380"></canvas><div style="display:flex;justify-content:space-between"><div>Mult: <b id="mult" style="font-size:28px;color:#f59e0b">1.00x</b></div><div id="status" class="small">Waiting...</div></div></div>
 <script>
-let logged=false,mult=1,crash=1.5,state='waiting',trail=[],countInt=4;
-let bets={1:{placed:false,amount:0},2:{placed:false,amount:0}};
-let modalMode='login';
-window.REF_CODE="{{ ref_code or '' }}";
-const canvas=document.getElementById('graph'),ctx=canvas.getContext('2d'),multEl=document.getElementById('mult');
-function resize(){canvas.width=canvas.clientWidth*2;canvas.height=380*2;}resize();
-async function api(u,d=null){let o={headers:{'Content-Type':'application/json'}};if(d){o.method='POST';o.body=JSON.stringify(d);}let r=await fetch(u,o);return r.json();}
-function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerBg').style.display='block';}
-function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerBg').style.display='none';}
-
-function getModalHTML(mode){
-  modalMode=mode;
-  let ref = window.REF_CODE || '';
-  let refInput = mode==='register'? `<div class="pk-input-row"><input id="modalRef" class="pk-input" value="${ref}" placeholder="Referral Code (Optional)"></div>` : '';
-  return `<div class="close-x" onclick="closeLogin()">x</div>
-  <div class="pk-tabs"><div class="pk-tab ${mode==='login'?'active':''}" onclick="switchTab('login')">LOGIN</div><div class="pk-tab ${mode==='register'?'active':''}" onclick="switchTab('register')">REGISTER</div></div>
-  <div class="pk-body">
-    <div class="pk-input-row"><div class="pk-prefix">+254</div><input id="modalPhone" class="pk-input" placeholder="7xxxxxxxx" value="7"></div>
-    <div class="pk-input-row"><input id="modalPass" type="password" class="pk-input" placeholder="Password (min 4 chars)"></div>
-    ${refInput}
-    <button class="pk-btn" onclick="doModalAuth()">${mode==='login'?'LOGIN':'REGISTER & PLAY'}</button>
-    <p id="modalErr" style="color:#ff5555;font-size:12px;margin-top:10px;text-align:center"></p>
-    <span class="pk-link" onclick="switchTab('${mode==='login'?'register':'login'}')">${mode==='login'?'No account? Register':'Have account? Login'}</span>
-  </div>`;
-}
-function switchTab(m){document.getElementById('loginBoxContent').innerHTML=getModalHTML(m);}
-function openLogin(){document.getElementById('loginBoxContent').innerHTML=getModalHTML('login');document.getElementById('loginModal').style.display='flex';}
-function openRegister(){document.getElementById('loginBoxContent').innerHTML=getModalHTML('register');document.getElementById('loginModal').style.display='flex';}
-function closeLogin(){document.getElementById('loginModal').style.display='none';}
-
-async function doModalAuth(){
-  let phoneRaw=document.getElementById('modalPhone').value.trim();
-  let phone = phoneRaw.startsWith('254')? phoneRaw : '254'+phoneRaw.replace(/^0/,'').replace(/^\+254/,'');
-  if(phone.length<10) phone = '254'+phoneRaw;
-  let pass=document.getElementById('modalPass').value;
-  let ref=document.getElementById('modalRef')? document.getElementById('modalRef').value : '';
-  let errEl=document.getElementById('modalErr');
-  if(phone.length<12){errEl.innerText='Enter valid phone like 712345678';return;}
-  if(pass.length<4){errEl.innerText='Password too short';return;}
-  let d=await api('/api/auth',{email:phone,password:pass,action:modalMode,referral:ref});
-  if(!d.success){errEl.innerText=d.error;return;}
-  closeLogin();checkMe();
-}
-async function doLogout(){await api('/api/logout',{});logged=false;location.reload();}
-async function checkMe(){
-  let d=await api('/api/me');
-  if(d.logged){
-    logged=true;
-    document.getElementById('bal').innerText='KES '+(d.real+d.bonus).toFixed(0);
-    document.getElementById('balTop').innerText='KES '+(d.real+d.bonus).toFixed(0);
-    document.getElementById('realBal').innerText=d.real.toFixed(0);
-    document.getElementById('bonusBal').innerText=d.bonus.toFixed(0);
-    document.getElementById('topRight').innerHTML=`<span style="color:#aaa">${d.email}</span><span style="color:#ff4444;cursor:pointer;font-weight:900" onclick="doLogout()">LOGOUT</span><span class="bal" id="balTop">KES ${(d.real+d.bonus).toFixed(0)}</span>`;
-    document.getElementById('logoutBtn').style.display='block';
-    if(!d.bonus_claimed&&d.deposited>=350){document.getElementById('claimBtn').style.display='block';document.getElementById('bonusBar').innerText='✅ READY TO CLAIM 1000!';}
-    else if(d.bonus_claimed){document.getElementById('bonusBar').innerText='✅ BONUS CLAIMED - Need 3K to withdraw';}
-    loadRef();
-  } else {
-    document.getElementById('logoutBtn').style.display='none';
-  }
-}
-async function deposit(){let a=parseFloat(document.getElementById('depAmt').value),p=document.getElementById('phone').value;let d=await api('/api/deposit',{amount:a,phone:p});document.getElementById('msg').innerText=d.msg||d.error||'';checkMe();}
-async function claim(){let d=await api('/api/claim-bonus',{});document.getElementById('msg').innerText=d.msg||d.error;checkMe();}
-async function withdraw(){let a=document.getElementById('withAmt').value;let d=await api('/api/withdraw',{amount:parseFloat(a)});document.getElementById('msg').innerText=d.msg||d.error;checkMe();}
-async function loadHist(){let h=await api('/api/history');let div=document.getElementById('histPills');div.innerHTML='';h.forEach(v=>{let c=v<2?'#ff4444':v<5?'#1a8a4a':'#2962ff';div.innerHTML+=`<span class="pill" style="background:${c}">${v.toFixed(2)}x</span>`});}
-async function loadRef(){let d=await api('/api/my-referral');if(!d.code)return;document.getElementById('refLink').innerText=d.link;document.getElementById('refCount').innerText=d.count;document.getElementById('refEarn').innerText=d.earned;window.MY_REF_LINK=d.link;}
-function copyRef(){if(window.MY_REF_LINK)navigator.clipboard.writeText(window.MY_REF_LINK);}
-
-function drawGraph(){
-let w=canvas.clientWidth,h=380;
-ctx.clearRect(0,0,w*2,h*2);ctx.fillStyle='#121212';ctx.fillRect(0,0,w*2,h*2);
-ctx.strokeStyle='#222';ctx.lineWidth=1;for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(0,(h*2)*i/6);ctx.lineTo(w*2,(h*2)*i/6);ctx.stroke();}
-if(trail.length<2)return;
-ctx.beginPath();ctx.moveTo(0,(h*2)-30);for(let i=0;i<trail.length;i++){ctx.lineTo(trail[i].x*2,trail[i].y*2);}
-ctx.strokeStyle='#ff8f00';ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
-ctx.lineTo(trail[trail.length-1].x*2,(h*2)-30);ctx.closePath();ctx.fillStyle='rgba(255,143,0,0.18)';ctx.fill();
-let last=trail[trail.length-1];ctx.font='50px Arial';ctx.fillText('✈️',(last.x*2)-25,(last.y*2)-25);
-}
-let livePlayers=[];
-function genLivePlayers(){livePlayers=[];let first=["Brian","Kevin","Faith","Sharon","Moses","Wanjiku","Otieno","Kamau","Njeri","Grace","Mutiso","John","Akinyi","Chebet","Njoroge","Omondi","Atieno","Kiprono","Chepkoech","Mwangi","Onyango","Wafula"];for(let i=0;i<600;i++){livePlayers.push({name:first[Math.floor(Math.random()*first.length)]+Math.floor(Math.random()*9999),bet:[10,20,50,100,200,350,500,1000,1500][Math.floor(Math.random()*9)],cash:Math.random()<0.6?Math.random()*2.5+1.1:Math.random()*20+2.5,status:'betting'});}}
-function renderLive(){let tb=document.getElementById('betsTable');tb.innerHTML='';for(let i=0;i<600;i++){let p=livePlayers[i];let c=p.status==='cashed'?'#00ff88':p.status==='busted'?'#ff4444':'#ffca28';let at=p.status==='betting'?'-':p.cash.toFixed(2)+'x';let win=p.status==='cashed'?`KES ${(p.bet*p.cash).toFixed(0)}`:'-';tb.innerHTML+=`<tr><td>👤 ${p.name}</td><td>${p.bet}</td><td style="color:${c};font-weight:800">${at}</td><td style="color:#00ff88">${win}</td></tr>`;}}
-
-function startWaiting(){
-state='waiting';countInt=4;trail=[];mult=1;
-multEl.style.fontSize='80px';multEl.style.color='#fff';
-multEl.innerHTML=`${countInt}<small>Next round in ${countInt}s - Place your bet!</small>`;
-drawGraph();
-let iv=setInterval(()=>{
-if(state!=='waiting'){clearInterval(iv);return;}
-if(countInt<=1){
-multEl.innerHTML=`1<small>Starting...</small>`;
-clearInterval(iv);setTimeout(()=>{startFlying();},800);
-}else{
-countInt--;multEl.innerHTML=`${countInt}<small>Next round in ${countInt}s - Place your bet!</small>`;
-}},1000);
-}
-async function startFlying(){
-let c=await api('/api/crash');crash=c.crash;state='flying';trail=[];genLivePlayers();renderLive();
-let start=Date.now();
-let flyIv=setInterval(()=>{
-if(state!=='flying'){clearInterval(flyIv);return;}
-let elapsed=(Date.now()-start)/1000;
-mult = Math.exp(0.07 * elapsed);
-if(mult<1)mult=1;
-let progress=Math.min(elapsed*7, 100);
-let w=canvas.clientWidth,h=380;
-let x = (progress/100)*w*0.85;
-let y = h-10 - Math.pow(progress/100,1.7)*(h*0.78);
-trail.push({x:x,y:y});if(trail.length>180)trail.shift();
-multEl.innerHTML=`${mult.toFixed(2)}x`;multEl.style.color='#ffca28';multEl.style.fontSize='70px';
-drawGraph();
-[1,2].forEach(n=>{if(bets[n].placed){let btn=document.getElementById('btn'+n);btn.className='btn btn-yellow';btn.innerText=`CASHOUT KES ${(bets[n].amount*mult).toFixed(0)} @ ${mult.toFixed(2)}x`;}});
-livePlayers.forEach(p=>{if(p.status==='betting'&&mult>=p.cash){p.status='cashed';}});
-if(mult>=crash){
-clearInterval(flyIv);state='busted';
-multEl.innerHTML=`BUSTED @ ${crash.toFixed(2)}x<small>Round ended</small>`;multEl.style.color='#ff4444';multEl.style.fontSize='32px';
-[1,2].forEach(n=>{if(bets[n].placed){let btn=document.getElementById('btn'+n);btn.className='btn btn-blue';btn.innerText=`BUSTED @ ${crash.toFixed(2)}x`;bets[n].placed=false;}});
-livePlayers.forEach(p=>{if(p.status==='betting')p.status='busted';});renderLive();loadHist();
-setTimeout(()=>{startWaiting();[1,2].forEach(n=>{let v=document.getElementById('bet'+n).value;let btn=document.getElementById('btn'+n);if(!bets[n].placed){btn.className='btn btn-blue';btn.innerText=`BET - KES ${v}`;}});},3000);
-}},100);
-}
-async function betAction(n){
-if(!logged){openLogin();return;}
-let amt=parseFloat(document.getElementById('bet'+n).value);let btn=document.getElementById('btn'+n);
-if(!bets[n].placed){
-let d=await api('/api/bet',{amount:amt});if(!d.success){alert(d.error);return;}
-bets[n].placed=true;bets[n].amount=amt;
-if(state==='waiting'){btn.className='btn btn-red';btn.innerText=`WAITING - CANCEL`;}else{btn.className='btn btn-yellow';}
-checkMe();
-}else{
-if(state==='waiting'){bets[n].placed=false;btn.className='btn btn-blue';btn.innerText=`BET - KES ${amt}`;await api('/api/cashout',{bet:amt,multiplier:1});checkMe();}
-else if(state==='flying'){let d=await api('/api/cashout',{bet:amt,multiplier:mult});bets[n].placed=false;btn.className='btn btn-blue';btn.innerText=`CASHED WIN KES ${d.win.toFixed(0)}`;checkMe();setTimeout(()=>{btn.innerText=`BET - KES ${amt}`;},2500);}
-}
-}
-checkMe();loadHist();genLivePlayers();renderLive();startWaiting();
+let bal=0,isBet=false,bet=0,crashed=false,curMult=1.0,crashPoint=2.5,gameRunning=false,cashDone=false;
+function switchTab(t){document.getElementById('stkBox').style.display=t=='stk'?'block':'none';document.getElementById('manBox').style.display=t=='manual'?'block':'none';document.getElementById('tabSTK').className=t=='stk'?'active':'';document.getElementById('tabMAN').className=t=='manual'?'active':''}
+async function api(p,o){let r=await fetch(p,{method:o?.method||'GET',headers:{'Content-Type':'application/json'},body:o?.body?JSON.stringify(o.body):null});return r.json()}
+async function loadMe(){let d=await api('/api/me');if(!d.logged){document.getElementById('authBox').style.display='block';document.getElementById('userBox').style.display='none';return}document.getElementById('authBox').style.display='none';document.getElementById('userBox').style.display='block';document.getElementById('bal').innerText=d.total.toFixed(0);document.getElementById('real').innerText=d.real.toFixed(0);document.getElementById('bonus').innerText=d.bonus.toFixed(0);document.getElementById('dep').innerText=d.deposited.toFixed(0);bal=d.total;if(d.can_claim){document.getElementById('claimBtn').style.display='block'}loadRef();loadHist()}
+async function loadRef(){let d=await api('/api/my-referral');if(d.code){document.getElementById('refLink').innerText=d.link;document.getElementById('refCount').innerText=d.count;document.getElementById('refEarn').innerText=d.earned}}
+async function loadHist(){let d=await api('/api/history');let h=document.getElementById('hist');h.innerHTML='';d.slice(-15).forEach(v=>{let c=document.createElement('div');c.className='hchip';c.style.color=v<2?'#ef4444':v<5?'#22c55e':'#f59e0b';c.innerText=v.toFixed(2)+'x';h.appendChild(c)})}
+async function doAuth(act){let phone=document.getElementById('authPhone').value.trim(),pass=document.getElementById('authPass').value.trim(),ref=document.getElementById('refInput').value.trim().toUpperCase();if(!phone||!pass){document.getElementById('authMsg').innerText='Enter phone & password';return}let d=await api('/api/auth',{method:'POST',body:{email:phone,password:pass,action:act,referral:ref}});if(d.success){loadMe()}else{document.getElementById('authMsg').innerText=d.error}}
+async function claimBonus(){let d=await api('/api/claim-bonus',{method:'POST'});document.getElementById('msg').innerText=d.msg||d.error;loadMe()}
+async function doSTK(){let a=document.getElementById('depAmt').value,p=document.getElementById('depPhone').value||document.getElementById('authPhone').value;document.getElementById('stkMsg').innerText='Sending STK to '+p+'...';let d=await api('/api/deposit/stk',{method:'POST',body:{amount:parseFloat(a),phone:p}});document.getElementById('stkMsg').innerText=d.msg||d.error||JSON.stringify(d);if(d.success)setTimeout(loadMe,6000)}
+async function doManual(){let a=document.getElementById('manAmt').value,c=document.getElementById('manCode').value.trim().toUpperCase();if(!c){document.getElementById('manMsg').innerText='Enter code';return}document.getElementById('manMsg').innerText='Verifying '+c+'...';let d=await api('/api/deposit/manual',{method:'POST',body:{amount:parseFloat(a),mpesa_code:c}});document.getElementById('manMsg').innerText=d.msg||d.error;if(d.success)loadMe()}
+async function doWithdraw(){let a=document.getElementById('withAmt').value;document.getElementById('msg').innerText='Processing...';let d=await api('/api/withdraw',{method:'POST',body:{amount:parseFloat(a)}});document.getElementById('msg').innerText=d.msg||d.error;loadMe()}
+function copyRef(){let t=document.getElementById('refLink').innerText;navigator.clipboard.writeText(t);alert('Copied')}
+async function doLogout(){await api('/api/logout',{method:'POST'});location.reload()}
+let canvas=document.getElementById('game'),ctx=canvas.getContext('2d');function resize(){canvas.width=canvas.offsetWidth*2;canvas.height=760}resize();
+async function startRound(){if(gameRunning)return;gameRunning=true;crashed=false;cashDone=false;curMult=1.0;document.getElementById('status').innerText='Flying...';if(isBet)document.getElementById('cashBtn').style.display='block';let d=await api('/api/crash');crashPoint=d.crash;let start=Date.now();function loop(){let elapsed=(Date.now()-start)/1000;curMult=Math.pow(1.08,elapsed*2);if(curMult>=crashPoint){curMult=crashPoint;crashed=true;gameRunning=false;draw(true);endRound();return}document.getElementById('mult').innerText=curMult.toFixed(2)+'x';draw(false);if(gameRunning)requestAnimationFrame(loop)}loop()}
+function draw(isCrash){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle=isCrash?'#ef4444':'#f59e0b';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(40,canvas.height-60);let x=Math.min(curMult*60,canvas.width-80);let y=canvas.height-60-Math.log(curMult)*80;ctx.lineTo(40+x,y);ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 30px Arial';ctx.fillText(curMult.toFixed(2)+'x',50,80);if(isCrash){ctx.fillStyle='#ef4444';ctx.fillText('CRASHED @ '+crashPoint.toFixed(2)+'x',50,130)}}
+async function endRound(){document.getElementById('status').innerText='Crashed @ '+crashPoint.toFixed(2)+'x';document.getElementById('cashBtn').style.display='none';document.getElementById('betBtn').style.display='block';if(isBet&&!cashDone){isBet=false;bet=0;document.getElementById('msg').innerText='Crashed! Lost'}isBet=false;bet=0;loadHist();loadMe();setTimeout(startRound,4000)}
+async function placeBet(){let amt=parseFloat(document.getElementById('betAmt').value);if(amt<=0||amt>bal){document.getElementById('msg').innerText='Low balance';return}let d=await api('/api/bet',{method:'POST',body:{amount:amt}});if(!d.success){document.getElementById('msg').innerText=d.error;return}isBet=true;bet=amt;cashDone=false;document.getElementById('betBtn').style.display='none';document.getElementById('cashBtn').style.display='block';document.getElementById('msg').innerText='Bet KES '+amt;loadMe()}
+async function doCashout(){if(!isBet||cashDone)return;cashDone=true;let d=await api('/api/cashout',{method:'POST',body:{bet:bet,multiplier:curMult}});if(d.success){document.getElementById('msg').innerText='WIN KES '+d.win.toFixed(0)+' @ '+curMult.toFixed(2)+'x';isBet=false;document.getElementById('cashBtn').style.display='none';document.getElementById('betBtn').style.display='block';loadMe()}}
+document.getElementById('betAmt').addEventListener('input',e=>{document.getElementById('betBtn').innerText='PLACE BET - KES '+e.target.value});
+loadMe();startRound();
 </script></body></html>
